@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geodesic time mesh — Module II | Chronowave Dynamics</title>
+<meta name="description" content="Module II of the Chronowave Dynamics Temporal Engine: Proper time and coordinate time, beating against each other.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23070B14'/%3E%3Ctext x='32' y='44' font-family='serif' font-style='italic' font-size='34' fill='%23F5A83C' text-anchor='middle'%3Et%C2%B3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+/* ============================================================
+   CHRONOWAVE DYNAMICS · TEMPORAL ENGINE
+   phosphor cyan → thermal amber duotone over a deep time-field
+   ============================================================ */
+:root{
+  --field:      #070B14;
+  --field-2:    #0B1120;
+  --field-3:    #101830;
+  --ivory:      #EDE8DC;
+  --ivory-dim:  rgba(237,232,220,.62);
+  --ivory-faint:rgba(237,232,220,.38);
+  --cyan:       #59D6C9;
+  --cyan-dim:   rgba(89,214,201,.35);
+  --amber:      #F5A83C;
+  --amber-dim:  rgba(245,168,60,.35);
+  --hairline:   rgba(237,232,220,.12);
+  --serif: "STIX Two Text", "Times New Roman", serif;
+  --grot:  "Space Grotesk", system-ui, sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, monospace;
+  --max: 1140px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{
+  background:var(--field); color:var(--ivory);
+  font-family:var(--serif); font-size:17px; line-height:1.72;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+::selection{background:var(--amber);color:var(--field)}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(18px,4.5vw,56px)}
+.eyebrow{
+  font-family:var(--grot);font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--cyan);font-weight:500;display:flex;align-items:center;gap:14px;
+}
+.eyebrow::after{content:"";height:1px;flex:0 0 56px;background:linear-gradient(90deg,var(--cyan),transparent)}
+.eyebrow .rn{color:var(--amber);letter-spacing:.14em}
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(29px,4vw,44px);line-height:1.16;letter-spacing:-.01em;margin:18px 0 8px}
+h2 em{font-style:italic;color:var(--amber)}
+h3{font-family:var(--serif);font-weight:600;font-size:20px;margin:0 0 6px}
+.lede{font-size:clamp(17px,1.6vw,20px);color:var(--ivory-dim);max-width:64ch}
+p{color:var(--ivory-dim);max-width:66ch;margin-bottom:1.1em}
+p strong{color:var(--ivory);font-weight:600}
+section{padding:clamp(68px,9vh,120px) 0;position:relative}
+section + section{border-top:1px solid var(--hairline)}
+
+/* equation panels */
+.eq-panel{background:linear-gradient(180deg,var(--field-2),rgba(13,21,36,.6));border:1px solid var(--hairline);border-left:none;border-radius:10px;padding:26px 26px 22px;margin:26px 0;overflow:visible;position:relative;counter-increment:eqn}
+.eq-panel::after{content:"eq " counter(eqn,decimal-leading-zero);position:absolute;right:14px;bottom:8px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:rgba(237,232,220,.28)}
+.eq-panel{box-shadow:inset 3px 0 0 0 var(--cyan)}
+.eq-panel[data-tag*="ASSUMED" i]{box-shadow:inset 3px 0 0 0 rgba(232,110,204,.85)}
+.eq-panel[data-tag*="ASSUMED" i]::before{color:rgba(232,110,204,.9)}
+.eq-panel[data-tag*="MEASURED" i],.eq-panel[data-tag*="FITTED" i]{box-shadow:inset 3px 0 0 0 var(--amber)}
+.eq-panel[data-tag*="MEASURED" i]::before,.eq-panel[data-tag*="FITTED" i]::before{color:var(--amber)}
+.eq-panel::before{content:attr(data-tag);position:absolute;top:-9px;left:20px;font-family:var(--grot);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);background:var(--field);padding:0 10px;max-width:86%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq{color:var(--ivory);font-size:18px;text-align:center}
+.eq .katex{font-size:1.08em}
+.eq .katex-display{margin:.35em 0}
+.eq-scroll{overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(89,214,201,.35) transparent}
+.eq-scroll::-webkit-scrollbar{height:5px}
+.eq-scroll::-webkit-scrollbar-thumb{background:rgba(89,214,201,.28);border-radius:3px}
+.eq-scroll::-webkit-scrollbar-track{background:transparent}
+.katex-fallback{font-family:var(--mono);font-size:13px;color:var(--cyan);white-space:pre-wrap}
+body{counter-reset:eqn}
+
+/* instrument chrome */
+.readout{font-family:var(--mono);font-size:12.5px;color:var(--cyan);letter-spacing:.03em}
+.readout b{color:var(--amber);font-weight:500}
+.panel{background:var(--field-2);border:1px solid var(--hairline);border-radius:12px;overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--hairline);font-family:var(--grot);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ivory-faint);flex-wrap:wrap}
+canvas.viz{display:block;width:100%;height:auto;background:radial-gradient(120% 100% at 50% 0%, rgba(89,214,201,.05), transparent 60%), var(--field-2)}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:20px 30px;padding:18px 20px;border-top:1px solid var(--hairline)}
+/* The basis carries the 170px, not min-width: `.controls .ctrl{min-width:0}` further down (the phone
+   fix) cancels the minimum at every width, and with flex:1's zero basis a slider then never forces a
+   wrap. It shrank to 11px beside its neighbours instead (the Lorenz rho, sigma and beta sliders). */
+.ctrl{min-width:170px;flex:1 1 170px}
+.ctrl.narrow{min-width:130px;flex:0 1 180px}
+.ctrl label{display:flex;justify-content:space-between;gap:8px;font-family:var(--grot);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ivory-faint);margin-bottom:8px}
+.ctrl label output{font-family:var(--mono);color:var(--amber);letter-spacing:0;text-transform:none;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--amber));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:var(--ivory);border:2px solid var(--field);box-shadow:0 0 0 1.5px var(--cyan),0 0 12px rgba(89,214,201,.5)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--ivory);border:2px solid var(--field);box-shadow:0 0 0 1.5px var(--cyan)}
+input[type=range]:focus-visible{outline:2px solid var(--amber);outline-offset:6px}
+.btn{font-family:var(--grot);font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;color:var(--field);background:var(--cyan);border:none;border-radius:100px;padding:11px 22px;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s}
+.btn:hover{background:var(--amber);box-shadow:0 0 24px rgba(245,168,60,.35)}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible{outline:2px solid var(--ivory);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--cyan);border:1px solid var(--cyan-dim)}
+.btn.ghost:hover{color:var(--amber);border-color:var(--amber);box-shadow:none}
+.btn.live{background:var(--amber)}
+.btn.mini{padding:7px 14px;font-size:10.5px}
+.seg{display:inline-flex;border:1px solid var(--hairline);border-radius:100px;overflow:hidden;flex-wrap:wrap}
+.seg button{font-family:var(--grot);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;background:transparent;color:var(--ivory-faint);border:none;padding:9px 17px;cursor:pointer;transition:color .2s,background .2s}
+.seg button+button{border-left:1px solid var(--hairline)}
+.seg button[aria-pressed="true"]{background:var(--field-3);color:var(--amber)}
+.seg button:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ivory-dim);background:transparent;border:1px solid var(--hairline);border-radius:100px;padding:6px 13px;cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--cyan);color:var(--cyan)}
+.chip[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);background:rgba(245,168,60,.08)}
+.chip:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--hairline);border-top:1px solid var(--hairline)}
+.stat{background:var(--field-2);padding:14px 18px}
+.stat .k{font-family:var(--grot);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-faint)}
+.stat .v{font-family:var(--mono);font-size:14.5px;color:var(--cyan);margin-top:4px;word-break:break-all}
+.stat .v.warm{color:var(--amber)}
+
+/* nav */
+nav#tf-nav{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(7,11,20,.75);border-bottom:1px solid var(--hairline)}
+nav#tf-nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:20px}
+.brand{font-family:var(--grot);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ivory);text-decoration:none;font-weight:600;white-space:nowrap}
+.brand span{color:var(--amber)}
+.navlinks{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{font-family:var(--grot);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ivory-faint);text-decoration:none;transition:color .2s;white-space:nowrap}
+.navlinks a:hover{color:var(--cyan)}
+.navlinks a .rn{color:var(--amber);margin-right:5px}
+@media(max-width:640px){.navlinks{display:none}}
+
+/* hero */
+header#hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;padding:120px 0 80px}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+#hero .wrap{position:relative;z-index:2}
+#hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(7,11,20,.25) 0%,rgba(7,11,20,0) 40%,rgba(7,11,20,.85) 92%)}
+.hero-kicker{font-family:var(--grot);font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:var(--cyan);margin-bottom:26px}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(42px,8vw,104px);line-height:.98;letter-spacing:-.02em}
+h1 .t-sup{display:inline-block;color:var(--amber);font-style:italic}
+.hero-sub{margin-top:30px;font-size:clamp(17px,1.9vw,21px);color:var(--ivory-dim);max-width:58ch}
+.hero-sub i{color:var(--ivory)}
+.hero-meta{margin-top:40px;display:flex;gap:32px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--ivory-faint);letter-spacing:.05em}
+.hero-meta div b{display:block;color:var(--cyan);font-weight:400;margin-bottom:3px}
+.hero-cta{margin-top:42px;display:flex;gap:14px;flex-wrap:wrap}
+.scroll-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;font-family:var(--grot);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ivory-faint);animation:hint 2.6s ease-in-out infinite}
+@keyframes hint{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+@media(prefers-reduced-motion:reduce){.scroll-hint{animation:none}}
+
+/* dimensional ladder */
+.ladder-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:start;margin-top:32px}
+@media(max-width:900px){.ladder-grid{grid-template-columns:1fr}}
+.dim-list{display:flex;flex-direction:column;gap:2px}
+#frameBar{position:relative;margin-top:-58px;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 14px;background:linear-gradient(rgba(7,11,20,0),rgba(7,11,20,.88) 40%)}
+#frameBar .chips{margin:0;justify-content:center}
+.readout{font-variant-numeric:tabular-nums}
+#hlStepVals{display:inline-block;min-width:30ch;white-space:nowrap}
+#hlRung{display:inline-block;min-width:38ch;white-space:nowrap;text-align:right}
+.stepGrp{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;border:1px solid var(--hairline);border-radius:999px;background:rgba(13,21,36,.8)}
+.stepGrp .readout{min-width:auto}
+#hlFineBand{display:none}
+#hlFineBand.on{display:flex;flex-wrap:wrap;align-items:flex-end}
+.hl-fine label{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.hl-fine output{min-width:82px;text-align:right;font-variant-numeric:tabular-nums}
+.hl-fine input[type=range]{width:100%}
+#ladderCanvas,#hlCanvas,#meshCanvas,#lorenzCanvas,#tvCanvas,#tfeCanvas{touch-action:none}
+@media (pointer:coarse){
+  .btn.mini{min-height:34px;min-width:34px;padding:6px 12px}
+  .stepGrp{padding:5px 12px}
+  input[type=number]{font-size:16px !important}
+  input[type=range]{min-height:30px}
+  select{min-height:32px;font-size:13px !important}
+}
+@media (max-width:720px){
+  .wrap{padding-left:14px;padding-right:14px}
+  .controls{gap:10px}
+  .ctrl.narrow{flex:1 1 100%}
+  #hlStepRow{gap:8px}
+  .readout{font-size:11px}
+  #meshAlg label{flex:1 1 100%}
+}
+
+/* ============ NARROW-VIEWPORT CONTAINMENT ============
+   Measured, not guessed: Chromium at 320 and 360 px reported
+   document.scrollWidth = 383, i.e. the whole page scrolled sideways, and the
+   deepest causes were a table row with min-content 369 px and a canvas with
+   min-content 367 px — both already sitting inside overflow-x:auto parents.
+   The reason the parents were not containing them is the default every grid
+   and flex item carries: min-width:auto, which resolves to MIN-CONTENT and
+   quietly overrides the scroll container. overflow-x:auto cannot shrink a box
+   whose minimum size is its content. So the fix is min-width:0 in the places
+   that scroll or are scrolled, and it belongs at every width, not behind a
+   media query — which is why this block sits outside one.
+   The canvas case is worse than a layout quirk: animate() writes
+   cv.width = cv.clientWidth every frame, so once the element has been wide,
+   its intrinsic width pins the minimum and it can never shrink back. That is a
+   one-way ratchet; max-width:100% breaks it. */
+.table-scroll, .eq-scroll{min-width:0}
+/* Any control row of buttons must be able to wrap. A non-wrapping flex row is
+   the general form of the fault measured in the lattice at 320 px, where three
+   buttons summed to 306 px in a 292 px box and pushed the whole document. */
+.controls .ctrl{min-width:0}
+.controls .ctrl > .seg, .controls .ctrl[style*="display:flex"]{flex-wrap:wrap}
+.seg{flex-wrap:wrap}
+canvas.viz{min-width:0;max-width:100%}
+.panel{min-width:0}
+.ref-grid > *, .split > *, .lattice-grid > *, .ladder-grid > *{min-width:0}
+.papers{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+/* long mono readouts must be allowed to break rather than push the page */
+.readout, .tier-note code{overflow-wrap:anywhere}
+
+@media (max-width:520px){
+  /* the canon and open-ruling card grids: a 252px track in a 292px content box
+     fits, but below that the track keeps its minimum and overflows. min() lets
+     the single column collapse to the container instead. */
+  #compendium [style*="minmax(252px"]{grid-template-columns:1fr !important}
+  .papers{grid-template-columns:1fr}
+  .paper{padding:18px 16px 16px}
+  .paper .glyph{font-size:30px;right:10px;top:6px}
+  .paper h3{font-size:16px;padding-right:32px}
+  .eq-panel{padding:22px 14px 18px}
+  .eq-panel::before{max-width:calc(100% - 28px)}
+  .eq{font-size:15px}
+  table.data th, table.data td{padding-right:10px}
+  .panel-head{padding:12px 14px;gap:10px}
+  .wrap{padding-left:12px;padding-right:12px}
+  /* Inline flex:0 0 auto on a control row beats the .ctrl.narrow rule above and
+     sizes the row to max-content — which is how three buttons summed to 306 px
+     inside a 292 px box. Below 520 px a control row takes the full width and
+     wraps inside itself instead. */
+  .controls .ctrl[style*="flex:0 0 auto"]{flex:1 1 100% !important}
+  .btn.mini{font-size:10px;padding:5px 9px}
+  /* the nav keeps only the brand at this width, so it must not reserve a row
+     for links that are display:none */
+  #tf-nav .wrap{gap:8px;flex-wrap:nowrap}
+  #tf-nav #palBtn{font-size:9px;padding:3px 6px;letter-spacing:0}
+  #tf-nav .brand{font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Measured at 320-414 px: the canon cards' category labels render at 9.5 px
+     in uppercase with .16em tracking, which is past legible on a phone, and the
+     "→ XIII" module links are 38x12 px tap targets. Both are compendium-wide
+     patterns, so they are fixed by shape rather than one at a time. */
+  #compendium div[style*="font-size:9.5px"]{font-size:10.5px !important;letter-spacing:.12em !important}
+  #compendium a[href^="#"]{display:inline-block;padding:7px 8px;margin:-7px -2px;min-height:30px;line-height:16px}
+}
+/* Tap targets for the in-card module links at every width: an inline anchor of
+   38x12 px is a miss on any touch screen, not only a narrow one. */
+@media (pointer:coarse){
+  #compendium a[href^="#"], .tier-note a[href^="#"]{display:inline-block;padding:6px 8px;margin:-6px -2px;min-height:30px}
+}
+body.frame-tau .rn{color:var(--amber)}
+body.frame-beat .rn{color:#E7C46B}
+.chip.fr-tau[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+.chip.fr-beat[aria-pressed="true"]{border-color:#E7C46B;color:#E7C46B}
+.dim-item{text-align:left;background:transparent;border:none;border-left:2px solid var(--hairline);padding:17px 20px;cursor:pointer;transition:border-color .25s,background .25s}
+.dim-item .dt{font-family:var(--serif);font-style:italic;font-size:24px;color:var(--ivory-dim);transition:color .25s}
+.dim-item .dn{font-family:var(--grot);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ivory-faint);margin-top:2px}
+.dim-item .dd{font-family:var(--serif);font-size:14.5px;color:var(--ivory-faint);margin-top:8px;line-height:1.55;max-width:40ch}
+.dim-item[aria-pressed="true"]{border-left-color:var(--amber);background:linear-gradient(90deg,rgba(245,168,60,.07),transparent)}
+.dim-item[aria-pressed="true"] .dt{color:var(--amber)}
+.dim-item[aria-pressed="true"] .dn{color:var(--cyan)}
+.dim-item:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.split.top{align-items:start}
+
+/* tables */
+table.data{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+table.data caption{caption-side:top;text-align:left;font-family:var(--grot);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ivory-faint);padding-bottom:12px}
+table.data th{font-weight:400;text-align:left;color:var(--cyan);letter-spacing:.05em;border-bottom:1px solid var(--hairline);padding:8px 12px 10px 0;white-space:nowrap}
+table.data td{color:var(--ivory-dim);padding:10px 12px 10px 0;border-bottom:1px solid rgba(237,232,220,.06);white-space:nowrap}
+table.data td.err{color:var(--amber)}
+table.data tr.final td{color:var(--ivory)}
+table.data tr.final td.err{color:var(--cyan);text-shadow:0 0 14px rgba(89,214,201,.5)}
+.table-scroll{overflow-x:auto}
+.ref-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:40px;align-items:start;margin-top:28px}
+@media(max-width:960px){.ref-grid{grid-template-columns:1fr}}
+
+/* master eq */
+.tier-note{font-family:var(--grot);font-size:11.5px;letter-spacing:.08em;color:var(--ivory-faint);margin-top:10px;line-height:1.6}
+/* .ctrl label and .panel-head are upper-cased, which also turns gamma into Gamma, omega into Omega
+   and "t" into "T". Symbols and live readouts keep their case. */
+.sym, .panel-head .readout{text-transform:none}
+.cpl{white-space:nowrap;margin-right:14px}
+.cpl input{width:5.2em;background:#0d1524;color:var(--amber);border:1px solid var(--hairline);border-radius:6px;padding:3px 6px;font-family:var(--mono);font-size:12px}
+.cpl input:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.tier-note a{color:var(--cyan);text-underline-offset:2px}
+.tier-note a:hover{color:var(--amber)}
+/* Modules V, VI, VIII-XII, XIV, XVI: prose runs the full column instead of a 64-74ch strip on the
+   left, matching the standalone module extracts. Drop a section from this list to restore the strip. */
+:is(#scramble,#gnss,#hydrogen,#cosmos,#master,#horizons,#attractor,#volume,#observatory) :is(p,.lede,.gr-list){max-width:none}
+:is(#scramble,#gnss,#hydrogen,#cosmos,#master,#horizons,#attractor,#volume,#observatory) .panel + .tier-note{margin-top:18px}
+.gr-list{list-style:none;margin:22px 0 0;display:grid;gap:12px;max-width:64ch}
+.gr-list li{padding-left:26px;position:relative;color:var(--ivory-dim);font-size:16px}
+.gr-list li::before{content:"";position:absolute;left:0;top:.62em;width:12px;height:1.5px;background:linear-gradient(90deg,var(--cyan),var(--amber))}
+
+/* lattice */
+.lattice-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:40px;align-items:start;margin-top:28px}
+@media(max-width:940px){.lattice-grid{grid-template-columns:1fr}}
+.scale-row{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 6px}
+.scale-cell{font-family:var(--mono);font-size:13px;color:var(--ivory-dim);border:1px solid var(--hairline);border-radius:8px;padding:9px 0;cursor:pointer;transition:all .18s;background:transparent;flex:1;min-width:44px;text-align:center}
+.scale-cell small{display:block;font-size:9px;color:var(--ivory-faint);letter-spacing:.08em;margin-top:2px}
+.scale-cell:hover{border-color:var(--cyan);color:var(--cyan)}
+.scale-cell.on{border-color:var(--amber);color:var(--amber);background:rgba(245,168,60,.09);box-shadow:0 0 18px rgba(245,168,60,.18)}
+.scale-cell:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* papers / compendium */
+.papers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:34px}
+.paper{border:1px solid var(--hairline);border-radius:12px;padding:22px 22px 20px;background:linear-gradient(160deg,var(--field-2),transparent 70%);transition:border-color .25s,transform .25s;position:relative;overflow:hidden}
+.paper:hover{border-color:var(--cyan-dim);transform:translateY(-3px)}
+.paper .pn{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.08em;margin-bottom:11px}
+.paper h3{font-size:17.5px;line-height:1.35;font-weight:600}
+.paper p{font-size:13.5px;line-height:1.6;color:var(--ivory-faint);margin:9px 0 0;max-width:none}
+.paper .glyph{position:absolute;right:14px;top:8px;font-family:var(--serif);font-style:italic;font-size:42px;color:rgba(89,214,201,.14)}
+
+.origin{border:1px solid var(--hairline);border-left:2px solid var(--amber);border-radius:0 12px 12px 0;padding:26px 30px;background:linear-gradient(90deg,rgba(245,168,60,.05),transparent 55%);margin-top:28px}
+.origin p{max-width:72ch}
+.origin .tagline{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.06em;margin-bottom:13px}
+
+footer{border-top:1px solid var(--hairline);padding:54px 0 70px;font-family:var(--grot);font-size:12px;letter-spacing:.14em;color:var(--ivory-faint)}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:baseline}
+footer .disc{font-family:var(--serif);font-size:13.5px;letter-spacing:0;max-width:52ch;line-height:1.6}
+
+/* scroll progress: time elapsed through the document */
+#progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;background:linear-gradient(90deg,var(--cyan),var(--amber));box-shadow:0 0 10px rgba(245,168,60,.5);pointer-events:none}
+.navlinks a.active{color:var(--amber)}
+/* section reveal (only when JS is live) */
+body.js section > .wrap{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+body.js section > .wrap.vis{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){body.js section > .wrap{opacity:1;transform:none;transition:none}}
+
+/* command console */
+#palette{position:fixed;inset:0;z-index:80;display:none;background:rgba(4,6,12,.66);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#palette.open{display:flex;align-items:flex-start;justify-content:center;padding:12vh 18px 0}
+.pal-box{width:min(560px,100%);background:var(--field-2);border:1px solid var(--cyan-dim);border-radius:14px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 40px rgba(89,214,201,.12)}
+.pal-box input{width:100%;background:transparent;border:none;outline:none;color:var(--ivory);font-family:var(--mono);font-size:15px;padding:16px 18px;border-bottom:1px solid var(--hairline)}
+.pal-box input::placeholder{color:var(--ivory-faint)}
+.pal-list{max-height:46vh;overflow-y:auto}
+.pal-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 18px;cursor:pointer;font-family:var(--grot);font-size:13px;letter-spacing:.06em;color:var(--ivory-dim)}
+.pal-item .cat{font-family:var(--mono);font-size:10px;color:var(--ivory-faint);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.pal-item.sel{background:var(--field-3);color:var(--amber)}
+.pal-item.sel .cat{color:var(--cyan)}
+.pal-foot{display:flex;gap:16px;padding:9px 18px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:10px;color:var(--ivory-faint)}
+kbd{font-family:var(--mono);font-size:10px;color:var(--cyan);border:1px solid var(--hairline);border-bottom-width:2px;border-radius:4px;padding:1px 6px;background:var(--field)}
+#palBtn{font-family:var(--mono);font-size:10.5px;color:var(--ivory-faint);background:transparent;border:1px solid var(--hairline);border-radius:6px;padding:4px 9px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
+#palBtn:hover{color:var(--cyan);border-color:var(--cyan-dim)}
+.key-hint{font-family:var(--mono);font-size:10.5px;color:var(--ivory-faint);letter-spacing:.04em;margin-top:10px}
+
+/* M3 source lattice */
+.m3-wrap{overflow-x:auto;padding:18px}
+.m3-grid{display:grid;grid-template-columns:repeat(13,minmax(52px,1fr));gap:0;min-width:720px;border:1px solid var(--hairline)}
+.m3-cell{
+  font-family:var(--mono);font-size:10.5px;color:var(--ivory-dim);
+  background:transparent;border:none;border-right:1px solid rgba(237,232,220,.09);border-bottom:1px solid rgba(237,232,220,.09);
+  padding:9px 3px;cursor:pointer;text-align:center;white-space:nowrap;transition:background .15s,color .15s;
+}
+.m3-cell:hover{color:var(--cyan);background:rgba(89,214,201,.06)}
+.m3-cell:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+.m3-cell.band{background:rgba(89,214,201,.045)}
+.m3-cell.bandL{border-left:2px double rgba(89,214,201,.55)}
+.m3-cell.bandR{border-right:2px double rgba(89,214,201,.55)}
+.m3-cell.a440{box-shadow:inset 0 0 0 1px rgba(245,168,60,.7)}
+.m3-cell.zeroSph{position:relative}
+.m3-cell.zeroSph::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;border:1px solid rgba(237,232,220,.55);background:transparent}
+.m3-cell:not(.zeroSph)::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;border:1px solid rgba(89,214,201,.30);background:radial-gradient(circle at 35% 35%, rgba(89,214,201,.45), rgba(89,214,201,.06))}
+.m3-cell{position:relative}
+.m3-key-zero,.m3-key-work{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:baseline;margin:0 2px}
+.m3-key-zero{border:1px solid rgba(237,232,220,.55)}
+.m3-key-work{border:1px solid rgba(89,214,201,.35);background:radial-gradient(circle at 35% 35%, rgba(89,214,201,.5), rgba(89,214,201,.08))}
+.m3-cell.rule{border-right:3px double rgba(237,232,220,.35)}
+.m3-cell.tonic{color:var(--amber);font-weight:500}
+
+.m3-cell.lit{background:rgba(245,168,60,.16);color:var(--amber);box-shadow:inset 0 0 0 1px rgba(245,168,60,.4)}
+.m3-cell.sel{background:rgba(245,168,60,.3);color:var(--field);font-weight:600;text-shadow:none}
+.m3-readout{font-family:var(--mono);font-size:11.5px;color:var(--ivory-dim);padding:12px 20px;border-top:1px solid var(--hairline);display:flex;gap:18px;flex-wrap:wrap}
+.m3-readout b{color:var(--amber);font-weight:500}
+.m3-readout .q{color:var(--cyan)}
+.m3-grid.m3-num .m3-cell{font-size:9.3px;letter-spacing:0;padding:9px 2px}
+
+
+/* live equation lines — panels recalculate with the module's current parameters */
+.eq-live{border-top:1px dashed var(--hairline);margin-top:16px;padding-top:12px;color:var(--cyan);font-size:14px;overflow-x:auto}
+.eq-live .katex{font-size:.98em}
+.eq-live::before{content:"live";font-family:var(--grot);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:7px}
+.txt-in{font-family:var(--mono);font-size:12.5px;color:var(--ivory);background:var(--field-3);border:1px solid var(--hairline);border-radius:8px;padding:8px 12px;width:100%;outline:none}
+.txt-in:focus{border-color:var(--cyan)}
+#helpBox{position:fixed;inset:0;z-index:80;display:none;background:rgba(4,6,12,.66);backdrop-filter:blur(6px)}
+#helpBox.open{display:flex;align-items:center;justify-content:center;padding:20px}
+.help-card{width:min(460px,100%);background:var(--field-2);border:1px solid var(--cyan-dim);border-radius:14px;padding:26px 30px}
+.help-card h3{font-family:var(--grot);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cyan);margin-bottom:16px}
+.help-card .row{display:flex;justify-content:space-between;gap:16px;font-family:var(--grot);font-size:13px;color:var(--ivory-dim);padding:7px 0;border-bottom:1px solid rgba(237,232,220,.06)}
+.icv-out{font-family:var(--mono);font-size:11.5px;color:var(--cyan);margin-top:10px;letter-spacing:.04em}
+.icv-out b{color:var(--amber);font-weight:500}
+@keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.hl-panel{position:relative}
+.hl-panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;z-index:2;
+  background:linear-gradient(-65deg,var(--cyan),#c850c8,var(--amber),var(--cyan));
+  background-size:400% 400%;animation:gradientBG 45s ease infinite}
+@media(prefers-reduced-motion:reduce){.hl-panel::before{animation:none}}
+.qreg{display:flex;flex-wrap:wrap;gap:6px;padding:12px 20px;border-top:1px solid var(--hairline)}
+.qreg .qk{font-family:var(--mono);font-size:10.5px;color:var(--ivory-dim);border:1px solid var(--hairline);border-radius:6px;padding:5px 9px;cursor:pointer;background:transparent;transition:all .15s}
+.qreg .qk small{color:var(--ivory-faint);margin-right:5px}
+.qreg .qk:hover{border-color:var(--cyan);color:var(--cyan)}
+.qreg .qk.hit{border-color:var(--amber);color:var(--amber);background:rgba(245,168,60,.12);box-shadow:0 0 14px rgba(245,168,60,.25)}
+.qreg .qk.zero{border-style:dashed;color:var(--ivory-faint)}
+.qreg .qk.zero.hit{border-color:var(--ivory);color:var(--ivory);background:rgba(237,232,220,.08)}
+</style>
+</head>
+<body>
+<div class="wrap" style="padding-top:28px">
+  <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ivory-faint)">Chronowave Dynamics &middot; Temporal Engine &middot; standalone module extract</div>
+</div>
+<section id="mesh">
+  <div class="wrap">
+    <div class="eyebrow"><span class="rn">II</span> Geodesic time mesh</div>
+    <h2>Proper time and coordinate time, <em>beating against each other</em></h2>
+    <p class="lede">The mesh instrument from the TimeSpace prototypes, rebuilt. Push a wave source toward
+      its medium's limit &mdash; sound or light &mdash; and watch &tau; = t/&gamma; fall behind coordinate
+      time. The gap is not discarded: it becomes a <strong>cross-frame beat</strong>, B<sub>T</sub> = |&tau; &minus; t|,
+      with its own beat frequency B<sub>f</sub> = |f<sub>t</sub> &minus; f<sub>t</sub>/&gamma;|.</p>
+    <div class="eq-panel" data-tag="Cross-frame beats">
+      <div class="eq eq-scroll" data-tex="\gamma = \frac{1}{\sqrt{1-\beta^2}}, \qquad \tau = \frac{t}{\gamma}, \qquad B_T = |\tau - t|, \qquad B_f = \Big|f_t - \frac{f_t}{\gamma}\Big|"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span>Time mesh &middot; vC-21 lineage</span>
+        <span class="seg" role="group" aria-label="Mesh view">
+          <button id="meshViewA" aria-pressed="true">Time mesh</button>
+          <button id="meshViewB" aria-pressed="false">Interference map</button>
+          <button id="meshViewD" aria-pressed="false">Interference field &middot; vC-22</button>
+          <button id="meshViewC" aria-pressed="false">Volumetric</button>
+        </span>
+      </div>
+      <canvas class="viz" id="meshCanvas" height="440" aria-label="Geodesic time mesh warped by the Lorentz factor" style="cursor:grab;touch-action:none"></canvas>
+      <div id="meshAlg" style="padding:8px 14px;border-top:1px solid var(--hairline)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="readout" style="opacity:.7">mesh algebra &middot; base pair t&#8320;,&tau;&#8320; then each added pair combines left-to-right</span>
+          <button class="btn mini ghost" id="meshAddL">+ add pair</button>
+        </div>
+        <div id="meshLayers"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">&gamma; = dt/d&tau;</div><div class="v warm" id="msGamma">1.0000</div></div>
+        <div class="stat"><div class="k">&tau; per 1 s of t</div><div class="v" id="msTau">1.0000 s</div></div>
+        <div class="stat"><div class="k">B_T beat time</div><div class="v" id="msBT">0.0000 s</div></div>
+        <div class="stat"><div class="k">B_f beat freq</div><div class="v warm" id="msBF">0.000 Hz</div></div>
+        <div class="stat"><div class="k">&gamma;&middot;B_T invariant</div><div class="v" id="msInv">0.0000</div></div>
+        <div class="stat"><div class="k">&lambda;_t wavelength</div><div class="v" id="msLam">0.780 m</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="meshV">Velocity <output id="meshVOut">100 m/s</output></label>
+          <input type="range" id="meshV" min="0" max="0.995" step="0.0005" value="0.29">
+        </div>
+        <div class="ctrl">
+          <label for="meshF">Source frequency f<sub>t</sub> <output id="meshFOut">440.0 Hz</output></label>
+          <input type="range" id="meshF" min="0.1" max="30000" step="0.1" value="440">
+        </div>
+        <div class="ctrl narrow" style="flex:0 0 auto;display:flex;align-items:flex-end;gap:8px">
+          <span class="seg" role="group" aria-label="Medium">
+            <button id="modeSound" aria-pressed="true">Sound</button>
+            <button id="modeLight" aria-pressed="false">Light</button>
+          </span>
+          <select id="meshMedSub" title="propagation medium" style="background:#0d1524;color:var(--ivory);border:1px solid var(--hairline);border-radius:5px;padding:3px 6px;font-family:var(--mono);font-size:11px"></select>
+        </div>
+      </div>
+      <div class="controls" style="border-top:none;padding-top:0">
+        <div class="chips" role="group" aria-label="Velocity presets">
+          <button class="chip" data-mvb="0.00408">Walking &middot; 1.4 m/s</button>
+          <button class="chip" data-mvb="0.0875">Car &middot; 30 m/s</button>
+          <button class="chip" data-mvb="0.729">Jet &middot; 250 m/s</button>
+          <button class="chip" data-mvb="0.995">Sound barrier &middot; &gamma;&rarr;2&pi;</button>
+          <button class="chip" data-mvb="0.5">0.5 c</button>
+          <button class="chip" data-mvb="0.9">0.9 c</button>
+        </div>
+      </div>
+    </div>
+    <p class="tier-note" style="max-width:70ch">In sound mode, &gamma; = 1 + &beta;(2&pi;&minus;1) reaches exactly
+      2&pi; at the sound barrier &mdash; the same invariant anchoring the M3 Source Lattice below. All four views
+      share one mesh algebra, composing added pairs left to right. <a href="Module_II_Manual.md">Full notes in the Manual
+      &rarr;</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div style="color:var(--ivory);letter-spacing:.3em;text-transform:uppercase;margin-bottom:10px">Chronowave <span style="color:var(--amber)">Dynamics</span></div>
+      <div>Framework &amp; papers &middot; Anthony M. Vargas &amp; Aethus Iqbal-Samir &middot; 2024&ndash;2026</div>
+    </div>
+    <div class="disc">Module II &middot; Geodesic time mesh, extracted standalone from the full Temporal Engine compendium on 2026-11-14. A speculative theoretical framework, presented as proposed in the source papers and prototypes.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CYAN = "#59D6C9", AMBER = "#F5A83C", IVORY = "#EDE8DC";
+function renderTex(el, tex, display){
+  if (window.katex){
+    try { katex.render(tex, el, {displayMode: display !== false, throwOnError: false}); return; }
+    catch(e){}
+  }
+  el.innerHTML = '<span class="katex-fallback"></span>';
+  el.firstChild.textContent = tex;
+}
+document.querySelectorAll(".eq[data-tex]").forEach(el => renderTex(el, el.dataset.tex));
+function fitCanvas(cv){
+  /* THE WHITEOUT BUG LIVED HERE: this used to read h from the height
+     attribute and then write cv.height = h*dpr \u2014 which IS that attribute.
+     On DPR-2 devices every call doubled the canvas (300\u2192600\u2192...) until it
+     passed the browser's max canvas area and rendering silently stopped:
+     the hyper-expansion and the blankouts were one bug. The design height
+     is now cached once and the resize is idempotent. */
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (!cv.dataset.designH) cv.dataset.designH = cv.getAttribute("height") || cv.clientHeight || 300;
+  const w = cv.clientWidth, h = +cv.dataset.designH;
+  const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+  if (cv.width !== bw) cv.width = bw;
+  if (cv.height !== bh) cv.height = bh;
+  cv.style.height = h + "px";
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return {ctx, w, h};
+}
+const animators = [];
+function animate(cv, draw){
+  /* Resilient loop: an exception in one frame must never kill the rAF chain
+     (the old behavior \u2014 one NaN-radius throw blanked the module until
+     reload: the reported whiteouts). Errors are caught, context state is
+     restored so dirt can't leak into later frames, the first few are logged
+     (+ collected on window.__frameErrs for the harness). Zero-size boxes are
+     skipped rather than fitted; height changes now also trigger refit. */
+  let st = null, visible = true, t0 = performance.now(), errN = 0;
+  const io = new IntersectionObserver(en => { visible = en[0].isIntersecting; }, {rootMargin:"140px"});
+  io.observe(cv);
+  function frame(now){
+    if (visible && cv.clientWidth > 0){
+      /* designH is also watched: a view that asks for a new height from inside
+         its draw (VIII's legacy "Two clocks · Z" asks for 472/664) used to be
+         clipped at the old height, because clientHeight still matched st.h */
+      if (!st || st.w !== cv.clientWidth || st.h !== cv.clientHeight ||
+          (cv.dataset.designH && st.h !== +cv.dataset.designH)) st = fitCanvas(cv);
+      try{
+        st.ctx.save();
+        draw(st.ctx, st.w, st.h, reduced ? 0 : (now - t0) / 1000);
+        st.ctx.restore();
+      }catch(e2){
+        try{ st.ctx.restore(); }catch(e3){}
+        errN++;
+        (window.__frameErrs = window.__frameErrs || []).push(cv.id + ": " + e2.message);
+        if (errN <= 3) console.warn("frame error on #" + cv.id, e2);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  animators.push(() => { st = null; });
+}
+window.addEventListener("resize", () => animators.forEach(f => f()));
+function duo(mix, a){ /* cyan->amber */
+  return `rgba(${89+(245-89)*mix|0},${214+(168-214)*mix|0},${201+(60-201)*mix|0},${a})`;
+}
+function fmtSI(v, unit){
+  if (!isFinite(v)) return "\u221E " + (unit||"");
+  const a = Math.abs(v);
+  if (a === 0) return "0 " + (unit||"");
+  if (a >= 1e4 || a < 1e-3) return v.toExponential(3) + " " + (unit||"");
+  return v.toPrecision(4) + " " + (unit||"");
+}
+const mesh = {
+  view: 0, medium: "sound",
+  SOUND: 343, LIGHT: 299792458,
+  el: {
+    v: document.getElementById("meshV"), f: document.getElementById("meshF"),
+    vOut: document.getElementById("meshVOut"), fOut: document.getElementById("meshFOut"),
+    g: document.getElementById("msGamma"), tau: document.getElementById("msTau"),
+    bt: document.getElementById("msBT"), bf: document.getElementById("msBF"), lam: document.getElementById("msLam")
+  },
+  cLimit(){ return this.medium === "sound" ? this.SOUND : this.LIGHT; },
+  physics(){
+    /* sound admits beta > 1 — supersonic sources are physical; light stays sub-c */
+    const beta = this.medium === "sound"
+      ? Math.min(3, +this.el.v.value)
+      : Math.min(0.9995, +this.el.v.value);
+    const v = beta * this.cLimit();
+    /* prototype lineage: acoustic gamma reaches exactly 2pi at the sound barrier */
+    const gamma = this.medium === "sound"
+      ? 1 + beta * (2*Math.PI - 1)
+      : 1 / Math.sqrt(1 - beta*beta);
+    const f = this.fOver || +this.el.f.value;
+    const tau = 1 / gamma;                 /* per 1 s of coordinate time */
+    const BT = Math.abs(tau - 1);
+    const Bf = Math.abs(f - f/gamma);
+    const lam = this.cLimit() / f;
+    return {beta, v, gamma, f, tau, BT, Bf, lam};
+  },
+  upd(){
+    const p = this.physics();
+    this.el.vOut.textContent = this.medium === "sound"
+      ? p.v.toFixed(1) + " m/s"
+      : (p.v >= 1e6 ? (p.v/1e6).toFixed(2) + " Mm/s" : p.v.toFixed(0) + " m/s") + " \u00B7 " + p.beta.toFixed(3) + " c";
+    this.el.fOut.textContent = p.f >= 1e9 ? (p.f/1e9).toFixed(3) + " GHz" :
+      p.f >= 1e6 ? (p.f/1e6).toFixed(3) + " MHz" : p.f >= 1e3 ? (p.f/1e3).toFixed(2) + " kHz" : p.f.toFixed(1) + " Hz";
+    this.el.g.textContent = p.gamma.toFixed(4);
+    this.el.tau.textContent = p.tau.toFixed(4) + " s";
+    this.el.bt.textContent = p.BT.toFixed(4) + " s";
+    this.el.bf.textContent = p.Bf.toFixed(2) + " Hz";
+    document.getElementById("msInv").textContent = (p.gamma * p.BT).toFixed(4);
+    this.el.lam.textContent = fmtSI(p.lam, "m");
+  }
+};
+mesh.el.v.addEventListener("input", () => mesh.upd());
+mesh.el.f.addEventListener("input", () => mesh.upd());
+document.querySelectorAll('#mesh .chip[data-mvb]').forEach(c => c.addEventListener("click", () => {
+  const b = +c.dataset.mvb;
+  if (b >= 0.4 && mesh.medium !== "light") document.getElementById("modeLight").click();
+  if (b < 0.4 && mesh.medium !== "sound") document.getElementById("modeSound").click();
+  mesh.el.v.value = b; mesh.upd();
+  document.querySelectorAll('#mesh .chip[data-mvb]').forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+}));
+document.getElementById("meshCanvas").addEventListener("dblclick", () => {
+  mesh.accT = 0; mesh.accTau = 0;
+});
+document.getElementById("modeSound").addEventListener("click", function(){
+  mesh.medium = "sound";
+  this.setAttribute("aria-pressed","true");
+  document.getElementById("modeLight").setAttribute("aria-pressed","false");
+  mesh.upd();
+});
+document.getElementById("modeLight").addEventListener("click", function(){
+  mesh.medium = "light";
+  this.setAttribute("aria-pressed","true");
+  document.getElementById("modeSound").setAttribute("aria-pressed","false");
+  mesh.upd();
+});
+document.getElementById("meshViewA").addEventListener("click", function(){
+  mesh.view = 0; setMeshView(this);
+});
+document.getElementById("meshViewB").addEventListener("click", function(){
+  mesh.view = 1; setMeshView(this);
+});
+document.getElementById("meshViewC").addEventListener("click", function(){
+  mesh.view = 2; setMeshView(this);
+});
+document.getElementById("meshViewD").addEventListener("click", function(){
+  mesh.view = 3; setMeshView(this);
+});
+function setMeshView(btn){
+  ["meshViewA","meshViewB","meshViewC","meshViewD"].forEach(id =>
+    document.getElementById(id).setAttribute("aria-pressed", String(document.getElementById(id) === btn)));
+}
+mesh.upd();
+mesh.HUES = [
+  ["89,214,201",  "245,168,60"],   /* base: teal / amber — reserved */
+  ["150,120,255", "235,110,220"],  /* violet / magenta */
+  ["255,95,110",  "255,160,180"],  /* crimson / rose */
+  ["90,150,255",  "160,225,255"],  /* azure / ice */
+  ["190,180,235", "130,140,190"]   /* lavender / slate */
+];
+mesh.MODES = ["(t+\u03C4)/2", "t\u00B7t", "\u03C4\u00B7\u03C4", "t\u00B7\u03C4", "B_T\u00B7t", "B_T\u00B7\u03C4"];
+mesh.base = { mode: "(t+\u03C4)/2", epoch: 0, frozen: false, frozenT: 0 };
+mesh.layers = [];
+mesh.clockHits = [];
+mesh.cam = { yaw: 0.62, pitch: 0.46, zoom: 1, px: 0, pz: 0, drag: null, mode: 0, moved: false };
+mesh.pairPhys = (ly) => {
+  const med2 = ly.med || mesh.medium;
+  const cs2 = med2 === "sound" ? mesh.SOUND : mesh.LIGHT;
+  const f2 = Math.max(0.001, ly.f), v2 = Math.min(0.995, Math.max(0, ly.vf))*cs2;
+  const beta2 = v2/cs2;
+  /* the module's own law: acoustic gamma in sound (2pi at the barrier), Lorentz in light.
+     gmO is a typed override and is allowed below 1. */
+  const gm2 = ly.gmO ? ly.gmO :
+    (med2 === "sound" ? 1 + beta2*(2*Math.PI - 1) : 1/Math.sqrt(Math.max(1e-9, 1 - beta2*beta2)));
+  const lamT = cs2/f2, lamTau = lamT*gm2;
+  const Bf2 = Math.abs(f2 - f2/gm2), BT2 = Bf2 > 1e-9 ? 1/Bf2 : Infinity;
+  return { cs: cs2, f: f2, v: v2, beta: beta2, gm: gm2, lamT, lamTau, Bf: Bf2, BT: BT2 };
+};
+mesh.pairTime = (ly, t) => ly.frozen ? (ly.frozenT - ly.epoch) : (t - ly.epoch);
+mesh.assemble = (t) => {
+  const p0 = mesh.physics();
+  const allPairs = [Object.assign({op:"+", f: p0.f, vf: Math.min(0.99, p0.beta || (p0.v/(mesh.medium==="sound"?mesh.SOUND:mesh.LIGHT)) || 0)}, mesh.base),
+                    ...mesh.layers];
+  allPairs[0].mode = mesh.base.mode; allPairs[0].epoch = mesh.base.epoch;
+  allPairs[0].frozen = mesh.base.frozen; allPairs[0].frozenT = mesh.base.frozenT;
+  allPairs[0].gmO = mesh.base.gmO; allPairs[0].med = mesh.medium;
+  return { allPairs, phys: allPairs.map(ly => mesh.pairPhys(ly)), times: allPairs.map(ly => mesh.pairTime(ly, t)) };
+};
+mesh.comp = (ly, ph2, r2, env, tt) => {
+  const k2 = 2*Math.PI/Math.max(0.02, Math.min(6, ph2.lamT));
+  const om3 = 2*Math.PI*ph2.f*4e-4;
+  const tL = Math.sin(k2*r2 - om3*tt)*env;
+  const uL = Math.sin(k2*ph2.gm*r2 - (om3/ph2.gm)*tt)*env;
+  const B2 = (uL - tL)/2;
+  switch (ly.mode){
+    case "t\u00B7t": return tL*tL*1.6;
+    case "\u03C4\u00B7\u03C4": return uL*uL*1.6;
+    case "t\u00B7\u03C4": return tL*uL*2;
+    case "B_T\u00B7t": return B2*tL*3;
+    case "B_T\u00B7\u03C4": return B2*uL*3;
+    default: return (tL + uL)/2;
+  }
+};
+mesh.applyOp = (v2, op, c2) => op === "\u2212" ? v2 - c2
+  : op === "\u00D7" ? v2*c2*1.7
+  : op === "\u00F7" ? v2/(Math.abs(c2) + 0.35)*0.6
+  : v2 + c2;
+mesh.map = { probe: null, solo: -1 };
+mesh.laySrc = (A, p, t) => A.allPairs.slice(1).map((ly, ix) => {
+  const i = ix + 1, ph = A.phys[i], isTau = /\u03C4/.test(ly.mode);
+  const ang = i*2.4 + 0.7;
+  return { x: Math.cos(ang)*105, z: Math.sin(ang)*78, tau: isTau,
+    ph: ((ly.epoch || 0)*0.7) % 6.28318,
+    k2v: 0.10*(1 + Math.min(2, ph.Bf/700))*Math.min(2.2, Math.max(0.6, ph.gm/3)),
+    omv: 1.4 + Math.min(4, ph.Bf/180), gmv: ph.gm, tt: A.times[i],
+    hue: mesh.HUES[i] ? mesh.HUES[i][isTau ? 1 : 0] : "150,120,255",
+    lay: true, opG: ly.op };
+});
+(function(){
+  const cv3 = document.getElementById("meshCanvas"), C = mesh.cam;
+  /* two-finger pinch = wheel zoom, on whichever view owns zoom */
+  const ptrs = new Map();
+  let pinchD = 0;
+  cv3.addEventListener("pointerdown", ev => { ptrs.set(ev.pointerId, [ev.clientX, ev.clientY]); if (ptrs.size === 2){ pinchD = 0; if (lpT){ clearTimeout(lpT); lpT = null; } } });
+  cv3.addEventListener("pointermove", ev => {
+    if (!ptrs.has(ev.pointerId)) return;
+    ptrs.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if (ptrs.size === 2){
+      const [p1, p2] = [...ptrs.values()];
+      const d2 = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+      if (pinchD > 0){
+        const f2 = d2/pinchD;
+        if (mesh.view === 0) C.zoom = Math.max(0.35, Math.min(6, C.zoom*f2));
+        else if (mesh.view === 3 && mesh.fld) mesh.fld.zoom = Math.max(0.3, Math.min(9, mesh.fld.zoom*f2));
+        C.drag = null; if (mesh.fld) mesh.fld.drag = null;   /* pinch owns the gesture */
+      }
+      pinchD = d2;
+    }
+  });
+  ["pointerup","pointercancel"].forEach(e2 => cv3.addEventListener(e2, ev => { ptrs.delete(ev.pointerId); pinchD = 0; }));
+  /* long-press = shift: freeze a clock, or reset everything, without a keyboard */
+  let lpT = null, lpXY = null;
+  cv3.addEventListener("pointerdown", ev => {
+    if (mesh.view !== 0 || ptrs.size > 1) return;
+    lpXY = [ev.clientX, ev.clientY];
+    lpT = setTimeout(() => {
+      const fake = { clientX: lpXY[0], clientY: lpXY[1], shiftKey: true };
+      C.moved = false;
+      cv3.dispatchEvent(Object.assign(new Event("click"), fake));
+      C.moved = true;   /* swallow the real click that follows the release */
+    }, 650);
+  });
+  cv3.addEventListener("pointermove", ev => {
+    if (lpXY && Math.hypot(ev.clientX - lpXY[0], ev.clientY - lpXY[1]) > 8){ clearTimeout(lpT); lpT = null; }
+  });
+  ["pointerup","pointercancel"].forEach(e2 => cv3.addEventListener(e2, () => { clearTimeout(lpT); lpT = null; }));
+})();
+(function(){
+  const cv3 = document.getElementById("meshCanvas"), C = mesh.cam;
+  const canvasXY = (ev) => {
+    const r2 = cv3.getBoundingClientRect();
+    return [(ev.clientX - r2.left)*(cv3.clientWidth/r2.width || 1), (ev.clientY - r2.top)*(cv3.clientHeight/r2.height || 1)];
+  };
+  const clockAt = (mx, my) => {
+    for (const hb of mesh.clockHits)
+      if (mx >= hb.x && mx <= hb.x + hb.w && my >= hb.y && my <= hb.y + hb.h) return hb;
+    return null;
+  };
+  cv3.addEventListener("pointerdown", ev => {
+    if (mesh.view !== 0) return;
+    const [mx, my] = canvasXY(ev);
+    if (clockAt(mx, my)) return;             /* clock clicks never start a rotation */
+    C.drag = [ev.clientX, ev.clientY]; C.mode = ev.shiftKey ? 1 : 0; C.moved = false;
+  });
+  cv3.addEventListener("pointermove", ev => {
+    if (mesh.view !== 0 || !C.drag) return;
+    const dx = ev.clientX - C.drag[0], dy = ev.clientY - C.drag[1];
+    if (Math.abs(dx) + Math.abs(dy) > 3) C.moved = true;
+    if (C.mode === 1){ C.px -= dx*0.008/C.zoom; C.pz -= dy*0.012/C.zoom; }
+    else { C.yaw += dx*0.007; C.pitch = Math.max(0.08, Math.min(1.35, C.pitch + dy*0.006)); }
+    C.drag = [ev.clientX, ev.clientY];
+  });
+  ["pointerup","pointercancel"].forEach(e2 => cv3.addEventListener(e2, () => { C.drag = null; }));
+  cv3.addEventListener("wheel", ev => {
+    if (mesh.view !== 0) return;
+    ev.preventDefault();
+    C.zoom = Math.max(0.35, Math.min(6, C.zoom * (ev.deltaY < 0 ? 1.1 : 0.9)));
+  }, {passive: false});
+  cv3.addEventListener("click", ev => {
+    if (mesh.view !== 0) return;
+    if (C.moved){ C.moved = false; return; }
+    const [mx, my] = canvasXY(ev);
+    const hb = clockAt(mx, my);
+    if (ev.shiftKey){
+      if (hb){ /* freeze/resume that pair, mesh contribution included */
+        const ly = hb.ref;
+        if (ly.frozen){ ly.epoch += (mesh.nowT - ly.frozenT); ly.frozen = false; }
+        else { ly.frozen = true; ly.frozenT = mesh.nowT; }
+      } else { /* reset the mesh and every clock pair */
+        C.yaw = 0.62; C.pitch = 0.46; C.zoom = 1; C.px = 0; C.pz = 0;
+        [mesh.base, ...mesh.layers].forEach(l2 => { l2.epoch = mesh.nowT; l2.frozen = false; });
+      }
+    }
+  });
+  cv3.addEventListener("dblclick", ev => {
+    if (mesh.view !== 0) return;
+    const [mx, my] = canvasXY(ev);
+    const hb = clockAt(mx, my);
+    if (hb){ hb.ref.epoch = mesh.nowT; hb.ref.frozen = false; }  /* that pair's time resets */
+    else { C.px = 0; C.pz = 0; }                                  /* the meshing recenters */
+  });
+})();
+function rgbAdj(rgbStr, adj){
+  if (!adj) return rgbStr;
+  let [r2, g2, b2] = rgbStr.split(",").map(Number).map(x2 => x2/255);
+  const mx2 = Math.max(r2, g2, b2), mn2 = Math.min(r2, g2, b2);
+  let h2 = 0, s2 = 0, l2 = (mx2 + mn2)/2;
+  const d2 = mx2 - mn2;
+  if (d2 > 1e-6){
+    s2 = d2/(1 - Math.abs(2*l2 - 1));
+    h2 = mx2 === r2 ? ((g2 - b2)/d2) % 6 : mx2 === g2 ? (b2 - r2)/d2 + 2 : (r2 - g2)/d2 + 4;
+    h2 *= 60;
+  }
+  h2 = (h2 + (adj.h || 0) + 360) % 360;
+  s2 = Math.max(0, Math.min(1, s2*(adj.s || 1)));
+  l2 = Math.max(0.05, Math.min(0.95, l2*(adj.l || 1)));
+  const c2 = (1 - Math.abs(2*l2 - 1))*s2, x3 = c2*(1 - Math.abs((h2/60) % 2 - 1)), m3 = l2 - c2/2;
+  const [rr3, gg3, bb3] = h2 < 60 ? [c2,x3,0] : h2 < 120 ? [x3,c2,0] : h2 < 180 ? [0,c2,x3] :
+    h2 < 240 ? [0,x3,c2] : h2 < 300 ? [x3,0,c2] : [c2,0,x3];
+  return [rr3, gg3, bb3].map(x2 => Math.round((x2 + m3)*255)).join(",");
+}
+mesh.hueFor = (i2, ly) => {
+  const base2 = mesh.HUES[i2 % mesh.HUES.length];
+  return ly && ly.adj ? [rgbAdj(base2[0], ly.adj), rgbAdj(base2[1], ly.adj)] : base2;
+};
+function meshLayersUI(){
+  const box = document.getElementById("meshLayers");
+  box.innerHTML = "";
+  const mkModeSel = (ly) => '<select data-k="mode" style="background:#0d1524;color:var(--ivory);border:1px solid var(--hairline);border-radius:5px;padding:3px 6px;font-family:var(--mono);font-size:11px">' +
+    mesh.MODES.map(m2 => '<option' + (m2 === ly.mode ? ' selected' : '') + '>' + m2.replace("B_T","B\u209C") + '</option>').join("") + '</select>';
+  /* base row: parameters come from the module controls; mode is selectable */
+  const brow = document.createElement("div");
+  brow.style.cssText = "display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap";
+  brow.innerHTML = '<span style="width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,rgb(89,214,201),rgb(245,168,60));box-shadow:0 0 8px rgba(89,214,201,.6)"></span>' +
+    '<span class="readout" style="opacity:.7">base pair \u00B7 f, v from the controls above \u00B7 stats in the data area</span>' + mkModeSel(mesh.base);
+  brow.querySelector('[data-k="mode"]').addEventListener("change", function(){ mesh.base.mode = mesh.MODES[this.selectedIndex]; });
+  box.appendChild(brow);
+  mesh.layers.forEach((ly, i) => {
+    const hue = mesh.HUES[(i + 1) % mesh.HUES.length];
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap";
+    row.innerHTML =
+      '<span data-k="sw" title="click: hue / saturation / brightness / glow" style="cursor:pointer;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,rgb(' + hue[0] + '),rgb(' + hue[1] + '))"></span>' +
+      '<select data-k="op" style="background:#0d1524;color:var(--ivory);border:1px solid var(--hairline);border-radius:5px;padding:3px 6px;font-family:var(--mono);font-size:11px">' +
+        ["+","\u2212","\u00D7","\u00F7"].map(o2 => '<option' + (o2 === ly.op ? ' selected' : '') + '>' + o2 + '</option>').join("") + '</select>' +
+      mkModeSel(ly) +
+      '<select data-k="med" style="background:#0d1524;color:var(--ivory);border:1px solid var(--hairline);border-radius:5px;padding:3px 6px;font-family:var(--mono);font-size:11px">' +
+        ["sound","light"].map(m2 => '<option value="' + m2 + '"' + ((ly.med || mesh.medium) === m2 ? ' selected' : '') + '>' + (m2 === "sound" ? "Snd" : "Lgt") + '</option>').join("") + '</select>' +
+      '<label style="font-family:var(--mono);font-size:10px;color:var(--ivory-faint)">f <input data-k="f" type="range" min="0.1" max="30000" step="0.1" value="' + ly.f + '" style="vertical-align:middle;width:110px"> <span data-o="f">' + ly.f.toFixed(0) + ' Hz</span></label>' +
+      '<label style="font-family:var(--mono);font-size:10px;color:var(--ivory-faint)">v <input data-k="vf" type="range" min="0" max="0.99" step="0.001" value="' + ly.vf + '" style="vertical-align:middle;width:100px"> <span data-o="vf">' + (ly.vf*100).toFixed(1) + '%</span></label>' +
+      '<span class="readout" style="opacity:.85;display:flex;gap:9px;flex-wrap:wrap">' +
+        ["gm","lamT","lamTau","Bf","BT","Tt","Ttau"].map(k4 => '<span data-o="' + k4 + '"></span>').join("") +
+      '</span>' +
+      '<button class="btn mini ghost" data-k="rm">\u00D7</button>';
+    const paint = () => {
+      const pp = mesh.pairPhys(ly);
+      const put = (k4, txt) => { row.querySelector('[data-o="' + k4 + '"]').textContent = txt; };
+      put("gm",     "\u03B3 " + pp.gm.toFixed(4));
+      put("lamT",   "\u03BB_t " + pp.lamT.toFixed(4) + "m");
+      put("lamTau", "\u03BB_\u03C4 " + pp.lamTau.toFixed(4) + "m");
+      put("Bf",     "B_f " + (pp.Bf < 0.005 ? "0" : pp.Bf.toFixed(2)) + "Hz");
+      put("BT",     "B_T " + (isFinite(pp.BT) && pp.BT < 1e4 ? pp.BT.toFixed(4) + "s" : "\u221E"));
+      put("Tt",     "T_t " + (1/pp.f).toExponential(3) + "s");
+      put("Ttau",   "T_\u03C4 " + (pp.gm/pp.f).toExponential(3) + "s");
+      row.querySelector('[data-k="f"]').value = ly.f;
+      row.querySelector('[data-o="f"]').textContent = ly.f.toFixed(ly.f < 100 ? 1 : 0) + " Hz";
+      row.querySelector('[data-k="vf"]').value = ly.vf;
+      row.querySelector('[data-o="vf"]').textContent = (ly.vf*100).toFixed(1) + "%";
+    };
+    /* every derived value accepts typed entry and back-solves the track:
+       gamma or lambda_tau or B or T_tau -> velocity (holding f);
+       lambda_t or T_t -> frequency (holding v). */
+    const setGamma = (g2) => {
+      g2 = Math.max(0.05, Math.min(40, g2));
+      const med2 = ly.med || mesh.medium;
+      if (med2 === "sound" && g2 >= 1 && g2 <= 2*Math.PI){ ly.gmO = null; ly.vf = (g2 - 1)/(2*Math.PI - 1); }
+      else if (med2 === "light" && g2 >= 1 && g2 <= 7.08){ ly.gmO = null; ly.vf = Math.sqrt(1 - 1/(g2*g2)); }
+      else ly.gmO = g2;   /* below 1 or beyond the slider's reach: direct override */
+    };
+    const solve = (k4, nv) => {
+      const cs2 = mesh.medium === "sound" ? mesh.SOUND : mesh.LIGHT;
+      const pp = mesh.pairPhys(ly);
+      if (!isFinite(nv) || nv <= 0) return;
+      if (k4 === "gm") setGamma(nv);
+      else if (k4 === "lamT") ly.f = Math.max(0.001, Math.min(1e6, cs2/nv));
+      else if (k4 === "lamTau") setGamma(nv/pp.lamT);
+      else if (k4 === "Bf"){ if (nv < pp.f) setGamma(pp.f/(pp.f - nv)); }
+      else if (k4 === "BT"){ const bf2 = 1/nv; if (bf2 < pp.f) setGamma(pp.f/(pp.f - bf2)); }
+      else if (k4 === "Tt") ly.f = Math.max(0.001, Math.min(1e6, 1/nv));
+      else if (k4 === "Ttau") setGamma(pp.f*nv);
+      paint();
+    };
+    const GETS = { gm: () => mesh.pairPhys(ly).gm, lamT: () => mesh.pairPhys(ly).lamT,
+      lamTau: () => mesh.pairPhys(ly).lamTau, Bf: () => mesh.pairPhys(ly).Bf,
+      BT: () => mesh.pairPhys(ly).BT, Tt: () => 1/mesh.pairPhys(ly).f,
+      Ttau: () => mesh.pairPhys(ly).gm/mesh.pairPhys(ly).f };
+    Object.keys(GETS).forEach(k4 => editableNum(row.querySelector('[data-o="' + k4 + '"]'), GETS[k4], nv => solve(k4, nv)));
+    row.querySelector('[data-k="op"]').addEventListener("change", function(){ ly.op = this.value; });
+    row.querySelector('[data-k="mode"]').addEventListener("change", function(){ ly.mode = mesh.MODES[this.selectedIndex]; });
+    row.querySelector('[data-k="med"]').addEventListener("change", function(){ ly.med = this.value; paint(); });
+    row.querySelector('[data-k="f"]').addEventListener("input", function(){ ly.f = +this.value; row.querySelector('[data-o="f"]').textContent = ly.f.toFixed(0) + " Hz"; paint(); });
+    row.querySelector('[data-k="vf"]').addEventListener("input", function(){ ly.vf = +this.value; ly.gmO = null; row.querySelector('[data-o="vf"]').textContent = (ly.vf*100).toFixed(1) + "%"; paint(); });
+    editableNum(row.querySelector('[data-o="f"]'), () => ly.f, nv => {
+      nv = Math.max(0.001, Math.min(3e11, nv));
+      if (nv > 1e9 && (ly.med || mesh.medium) === "sound"){
+        const vAbs2 = ly.vf*mesh.SOUND;
+        ly.med = "light"; ly.vf = Math.min(0.99, vAbs2/mesh.LIGHT);
+        const ms2 = row.querySelector('[data-k="med"]'); if (ms2) ms2.value = "light";
+      }
+      ly.f = nv;
+      row.querySelector('[data-k="f"]').value = ly.f;
+      row.querySelector('[data-o="f"]').textContent = ly.f.toFixed(0) + " Hz"; paint();
+    });
+    editableNum(row.querySelector('[data-o="vf"]'), () => ly.vf*100, nv => {
+      ly.vf = Math.max(0, Math.min(0.99, nv/100));
+      row.querySelector('[data-k="vf"]').value = ly.vf;
+      row.querySelector('[data-o="vf"]').textContent = (ly.vf*100).toFixed(1) + "%"; paint();
+    });
+    row.querySelector('[data-k="rm"]').addEventListener("click", () => { mesh.layers.splice(i, 1); meshLayersUI(); });
+    row.querySelector('[data-k="sw"]').addEventListener("click", function(){
+      let ed = row.querySelector('[data-k="huePanel"]');
+      if (ed){ ed.remove(); return; }
+      ly.adj = ly.adj || { h: 0, s: 1, l: 1, glow: false };
+      ed = document.createElement("span");
+      ed.setAttribute("data-k", "huePanel");
+      ed.style.cssText = "display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:9.5px;color:var(--ivory-faint)";
+      ed.innerHTML = 'H<input data-h type="range" min="-180" max="180" step="1" value="' + ly.adj.h + '" style="width:70px">' +
+        'S<input data-s type="range" min="0.3" max="1.7" step="0.01" value="' + ly.adj.s + '" style="width:56px">' +
+        'B<input data-l type="range" min="0.5" max="1.6" step="0.01" value="' + ly.adj.l + '" style="width:56px">' +
+        '<label>glow<input data-g type="checkbox"' + (ly.adj.glow ? " checked" : "") + '></label>';
+      const rp = () => {
+        const hu2 = mesh.hueFor(i + 1, ly);
+        this.style.background = "linear-gradient(135deg,rgb(" + hu2[0] + "),rgb(" + hu2[1] + "))";
+      };
+      ed.querySelector("[data-h]").addEventListener("input", function(){ ly.adj.h = +this.value; rp(); });
+      ed.querySelector("[data-s]").addEventListener("input", function(){ ly.adj.s = +this.value; rp(); });
+      ed.querySelector("[data-l]").addEventListener("input", function(){ ly.adj.l = +this.value; rp(); });
+      ed.querySelector("[data-g]").addEventListener("change", function(){ ly.adj.glow = this.checked; });
+      this.after(ed);
+    });
+    box.appendChild(row); paint();
+  });
+}
+function editableNum(el, getV, setV){
+  el.style.cursor = "text"; el.title = "double-click to type a value";
+  el.addEventListener("dblclick", ev => {
+    if (ev.stopPropagation) ev.stopPropagation();
+    const inp = document.createElement("input");
+    inp.type = "number"; inp.step = "any"; inp.value = getV();
+    inp.style.cssText = "width:76px;background:#0d1524;color:var(--ivory);border:1px solid rgba(89,214,201,.5);border-radius:4px;font-family:var(--mono);font-size:11px;padding:1px 5px";
+    el.style.display = "none"; el.parentNode.insertBefore(inp, el.nextSibling);
+    inp.focus(); inp.select();
+    let done2 = false;
+    const fin = (commit) => {
+      if (done2) return; done2 = true;
+      if (commit && isFinite(parseFloat(inp.value))) setV(parseFloat(inp.value));
+      inp.remove(); el.style.display = "";
+    };
+    inp.addEventListener("keydown", e2 => { if (e2.key === "Enter") fin(true); if (e2.key === "Escape") fin(false); });
+    inp.addEventListener("blur", () => fin(true));
+  });
+}
+(function(){
+  const fS = document.getElementById("meshF"), vS = document.getElementById("meshV");
+  const fO = document.getElementById("meshFOut"), vO = document.getElementById("meshVOut");
+  if (fS && fO) editableNum(fO, () => mesh.fOver || +fS.value, nv => {
+    nv = Math.max(0.001, Math.min(3e11, nv));
+    if (nv > 1e9 && mesh.medium === "sound"){
+      const vAbs = Math.min(3, +vS.value)*mesh.SOUND;
+      document.getElementById("modeLight").click();
+      vS.value = Math.min(0.9995, vAbs/mesh.LIGHT); vS.dispatchEvent(new Event("input"));
+    }
+    if (nv >= +fS.min && nv <= +fS.max){ mesh.fOver = null; fS.value = nv; fS.dispatchEvent(new Event("input")); }
+    else { mesh.fOver = nv; mesh.upd(); }
+  });
+  /* typed velocity is in m/s of the current medium — converted to beta internally */
+  if (vS && vO) editableNum(vO, () => (+vS.value)*mesh.cLimit(), nv => {
+    const b2 = Math.max(0, nv/mesh.cLimit());
+    vS.value = Math.min(+vS.max, b2); vS.dispatchEvent(new Event("input"));
+  });
+})();
+mesh.MEDS = {
+  sound: [["air \u00B7 343", 343], ["fresh water \u00B7 1481", 1481], ["ocean \u00B7 1530", 1530]],
+  light: [["vacuum \u00B7 c", 299792458], ["fresh water \u00B7 c/1.333", 224900568], ["ocean \u00B7 c/1.34", 223725715]]
+};
+function meshMedSubFill(){
+  const sel = document.getElementById("meshMedSub");
+  sel.innerHTML = mesh.MEDS[mesh.medium].map((m2, i2) => '<option value="' + i2 + '">' + m2[0] + '</option>').join("");
+  sel.value = "0";
+}
+document.getElementById("meshMedSub").addEventListener("change", function(){
+  const spd = mesh.MEDS[mesh.medium][+this.value][1];
+  if (mesh.medium === "sound") mesh.SOUND = spd; else mesh.LIGHT = spd;
+  mesh.upd();
+});
+meshMedSubFill();
+function meshVRange(){
+  const vS2 = document.getElementById("meshV");
+  if (mesh.medium === "sound"){ vS2.max = "2.5"; }
+  else { vS2.max = "0.9995"; if (+vS2.value > 0.9995) vS2.value = "0.9995"; }
+}
+["modeSound","modeLight"].forEach(id2 => document.getElementById(id2).addEventListener("click", () => {
+  mesh.SOUND = 343; mesh.LIGHT = 299792458;   /* fresh mode, standard constants */
+  meshMedSubFill(); meshVRange();
+}));
+meshVRange();
+(function(){
+  const vS = document.getElementById("meshV"), fS = document.getElementById("meshF");
+  if (!vS || !fS) return;
+  vS.addEventListener("input", () => { mesh.base.gmO = null; });
+  fS.addEventListener("input", () => { mesh.fOver = null; });
+  const setBaseGamma = (g2) => {
+    g2 = Math.max(0.05, Math.min(40, g2));
+    if (mesh.medium === "sound" && g2 >= 1 && g2 <= 2*Math.PI){
+      mesh.base.gmO = null; vS.value = (g2 - 1)/(2*Math.PI - 1); vS.dispatchEvent(new Event("input"));
+    } else if (mesh.medium === "light" && g2 >= 1 && g2 <= 7.08){
+      mesh.base.gmO = null; vS.value = Math.sqrt(1 - 1/(g2*g2)); vS.dispatchEvent(new Event("input"));
+    } else { mesh.base.gmO = g2; }
+  };
+  const setBaseF = (f2) => {
+    f2 = Math.max(0.001, Math.min(3e11, f2));
+    if (f2 > 1e9 && mesh.medium === "sound"){
+      /* GHz is light's territory: switch modes, hold the ABSOLUTE velocity constant */
+      const vAbs = Math.min(3, +vS.value)*mesh.SOUND;
+      document.getElementById("modeLight").click();
+      vS.value = Math.min(0.9995, vAbs/mesh.LIGHT); vS.dispatchEvent(new Event("input"));
+    }
+    if (f2 >= +fS.min && f2 <= +fS.max){ mesh.fOver = null; fS.value = f2; fS.dispatchEvent(new Event("input")); }
+    else { mesh.fOver = f2; mesh.upd(); }
+  };
+  const gcur = () => mesh.base.gmO || mesh.physics().gamma;
+  const bind = (id2, getV, apply) => {
+    const el2 = document.getElementById(id2);
+    if (el2) editableNum(el2, getV, apply);
+  };
+  bind("msGamma", gcur, nv => setBaseGamma(nv));
+  bind("msTau",  () => 1/gcur(), nv => { if (nv > 0) setBaseGamma(1/nv); });
+  bind("msBT",   () => Math.abs(1/gcur() - 1), nv => { if (nv >= 0 && nv < 1) setBaseGamma(1/(1 - nv)); });
+  bind("msBF",   () => mesh.physics().Bf, nv => { const f2 = mesh.physics().f; if (nv >= 0 && nv < f2) setBaseGamma(f2/(f2 - nv)); });
+  bind("msInv",  () => gcur()*Math.abs(1/gcur() - 1), nv => { if (nv >= 0) setBaseGamma(nv + 1); });
+  bind("msLam",  () => mesh.physics().lam, nv => { if (nv > 0) setBaseF(mesh.cLimit()/nv); });
+})();
+(function(){
+  const lab = document.querySelector('label[for="meshV"]');
+  const chipBox = document.querySelector('#mesh .chips');
+  const vS = document.getElementById("meshV");
+  if (!lab || !chipBox || !vS) return;
+  lab.title = "ctrl+click to save the current velocity as a preset";
+  lab.addEventListener("click", ev => {
+    if (!ev.ctrlKey) return;
+    const b2 = +vS.value;
+    const c2 = document.createElement("button");
+    c2.className = "chip"; c2.setAttribute("data-mvb", String(b2));
+    const vAbs = b2*(mesh.medium === "sound" ? mesh.SOUND : mesh.LIGHT);
+    c2.textContent = "Custom \u00B7 " + (vAbs >= 1e6 ? (vAbs/1e6).toFixed(1) + " Mm/s" : vAbs.toFixed(1) + " m/s");
+    c2.addEventListener("click", () => {
+      vS.value = b2; vS.dispatchEvent(new Event("input"));
+      document.querySelectorAll('#mesh .chip[data-mvb]').forEach(x2 => x2.setAttribute("aria-pressed", String(x2 === c2)));
+    });
+    chipBox.appendChild(c2);
+  });
+})();
+document.getElementById("meshAddL").addEventListener("click", () => {
+  if (mesh.layers.length >= 5) return;
+  mesh.layers.push({ op: "+", mode: "(t+\u03C4)/2", med: mesh.medium, f: 200 + Math.round(Math.random()*500), vf: 0.3, epoch: mesh.nowT || 0, frozen: false, frozenT: 0 });
+  meshLayersUI();
+});
+meshLayersUI();
+animate(document.getElementById("meshCanvas"), (ctx, w, h, t) => {
+  ctx.clearRect(0, 0, w, h);
+  const p = mesh.physics();
+  const warp = Math.log(p.gamma + 1);
+  const A = mesh.assemble(t);
+  if (mesh.view === 0){
+    mesh.nowT = t;
+    const C = mesh.cam;
+    const allPairs = [Object.assign({op:"+", f: p.f, vf: Math.min(0.99, p.beta || (p.v/(mesh.medium==="sound"?mesh.SOUND:mesh.LIGHT)) || 0)}, mesh.base),
+                      ...mesh.layers];
+    /* keep base live-synced to the module controls */
+    allPairs[0].mode = mesh.base.mode; allPairs[0].epoch = mesh.base.epoch;
+    allPairs[0].frozen = mesh.base.frozen; allPairs[0].frozenT = mesh.base.frozenT;
+    allPairs[0].gmO = mesh.base.gmO; allPairs[0].med = mesh.medium;
+    const phys = allPairs.map(ly => mesh.pairPhys(ly));
+    const comp = (ly, ph2, r2, env, tt) => {
+      const k2 = 2*Math.PI/Math.max(0.02, Math.min(6, ph2.lamT));
+      const om3 = 2*Math.PI*ph2.f*4e-4;
+      const tL = Math.sin(k2*r2 - om3*tt)*env;
+      const uL = Math.sin(k2*ph2.gm*r2 - (om3/ph2.gm)*tt)*env;
+      const B2 = (uL - tL)/2;
+      switch (ly.mode){
+        case "t\u00B7t": return tL*tL*1.6;        /* the leg crossed with itself */
+        case "\u03C4\u00B7\u03C4": return uL*uL*1.6;
+        case "t\u00B7\u03C4": return tL*uL*2;
+        case "B_T\u00B7t": return B2*tL*3;
+        case "B_T\u00B7\u03C4": return B2*uL*3;
+        default: return (tL + uL)/2;
+      }
+    };
+    const times = allPairs.map(ly => mesh.pairTime(ly, t));
+    const val = (i2, x2, z2) => {
+      const r2 = Math.hypot(x2, z2);
+      return comp(allPairs[i2], phys[i2], r2, Math.exp(-r2*0.30), times[i2]);
+    };
+    const folded = (x2, z2) => {
+      const r2 = Math.hypot(x2, z2), env = Math.exp(-r2*0.30); /* once, for every pair */
+      let v2 = comp(allPairs[0], phys[0], r2, env, times[0]);
+      for (let i2 = 1; i2 < allPairs.length; i2++){
+        const u2 = comp(allPairs[i2], phys[i2], r2, env, times[i2]), op2 = allPairs[i2].op;
+        if (op2 === "+") v2 += u2;
+        else if (op2 === "\u2212") v2 -= u2;
+        else if (op2 === "\u00D7") v2 *= u2*2.2;
+        else { const d2 = Math.sign(u2 || 1)*Math.max(Math.abs(u2), 0.22); v2 = v2/d2*0.5; }
+      }
+      return 2.8*Math.tanh(v2/1.9);   /* soft saturation: taller peaks, no clipping */
+    };
+    const scl = Math.min(w, h)*0.5*C.zoom, cyv = Math.cos(C.yaw), syv = Math.sin(C.yaw);
+    const cpv = Math.cos(C.pitch), spv = Math.sin(C.pitch);
+    const hAmp = 0.26;
+    const prj = (x2, y2, z2) => {
+      const rx = x2*cyv - z2*syv, rz = x2*syv + z2*cyv;
+      const ry = y2*cpv - rz*spv, rz2 = y2*spv + rz*cpv;
+      return [w/2 + rx*scl, h*0.52 - ry*scl, rz2];
+    };
+    const E2 = 2.5;
+    /* each added pair, sparse and hued, so the voices stay visible under the result */
+    for (let i2 = 1; i2 < allPairs.length; i2++){
+      const hue = mesh.hueFor(i2, allPairs[i2]);
+      const glow2 = allPairs[i2].adj && allPairs[i2].adj.glow;
+      const NL = 28;
+      for (let i3 = 0; i3 <= NL; i3++){
+        ctx.beginPath();
+        for (let j3 = 0; j3 <= NL; j3++){
+          const x2 = (j3/NL - 0.5)*2*E2 + C.px, z2 = (i3/NL - 0.5)*2*E2 + C.pz;
+          const v2 = val(i2, x2, z2);
+          const q3 = prj((j3/NL - 0.5)*2*E2, v2*hAmp, (i3/NL - 0.5)*2*E2);
+          j3 === 0 ? ctx.moveTo(q3[0], q3[1]) : ctx.lineTo(q3[0], q3[1]);
+        }
+        /* each voice mesh grades from its first hue to its second across the sheet */
+        const gmix = i3/NL, hq = (q4) => Math.round(+hue[0].split(",")[q4] + (+hue[1].split(",")[q4] - +hue[0].split(",")[q4])*gmix);
+        ctx.strokeStyle = `rgba(${hq(0)},${hq(1)},${hq(2)},${(allPairs[i2].frozen ? 0.05 : 0.135)*(glow2 ? 1.7 : 1)})`;
+        ctx.lineWidth = glow2 ? 0.9 : 0.6; ctx.stroke();
+      }
+    }
+    /* the folded result: dense, duotone, gold nodal skeleton, motion-lit */
+    const N2 = 66;
+    const G = [];
+    for (let i3 = 0; i3 <= N2; i3++){
+      G[i3] = [];
+      for (let j3 = 0; j3 <= N2; j3++){
+        const lx2 = (j3/N2 - 0.5)*2*E2, lz2 = (i3/N2 - 0.5)*2*E2;
+        const x2 = lx2 + C.px, z2 = lz2 + C.pz;
+        const v2 = folded(x2, z2);
+        const edge = Math.min(1, Math.max(0, (E2 - Math.max(Math.abs(lx2), Math.abs(lz2)))/(E2*0.27)));
+        G[i3][j3] = [...prj(lx2, v2*hAmp, lz2), v2, edge*edge*(3 - 2*edge)];
+      }
+    }
+    /* per-segment strokes, continuous alpha — each wire individually lit.
+       Near-invisible segments skip early; everything else pays for its glow. */
+    const seg2 = (a2, b2) => {
+      const v2 = (a2[3] + b2[3])/2;
+      let dep = 0.4 + 0.6*Math.min(1, Math.max(0, (a2[2] + 2)/4));
+      dep *= (a2[4] !== undefined ? a2[4] : 1);
+      const act = Math.min(1, Math.abs(v2)*1.4);
+      const nodal = Math.abs(a2[3]) < 0.05 && Math.abs(b2[3]) < 0.05 && Math.abs(a2[3] - b2[3]) > 1e-4;
+      const alp = nodal ? 0.4*dep : (0.07 + 0.32*act)*dep;
+      if (alp < 0.02) return;
+      ctx.strokeStyle = nodal ? `rgba(255,215,0,${alp})` :
+        v2 > 0 ? `rgba(89,214,201,${alp})` : `rgba(245,168,60,${alp})`;
+      ctx.lineWidth = nodal ? 1.2 : 0.7;
+      ctx.beginPath(); ctx.moveTo(a2[0], a2[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke();
+    };
+    for (let i3 = 0; i3 <= N2; i3++) for (let j3 = 0; j3 < N2; j3++) seg2(G[i3][j3], G[i3][j3+1]);
+    for (let j3 = 0; j3 <= N2; j3++) for (let i3 = 0; i3 < N2; i3++) seg2(G[i3][j3], G[i3+1][j3]);
+    /* ============ THE CLOCK COLUMN ============
+       Each pair's two clocks, stacked downward under the base pair, in its hue.
+       t hand runs true; tau hand runs slow by 1/gamma. Frozen pairs hold their hands. */
+    mesh.clockHits = [];
+    const ckX = w - 132, ckW = 122, ckH0 = 12;
+    const ckRH = Math.min(86, Math.floor((h - 26)/allPairs.length));
+    const full = ckRH >= 70;
+    allPairs.forEach((ly, i2) => {
+      const hue = mesh.hueFor(i2, ly);
+      const y0 = ckH0 + i2*ckRH;
+      if (y0 + ckRH > h - 20) return;
+      const rr2 = 7;
+      ctx.beginPath();
+      ctx.moveTo(ckX + rr2, y0);
+      ctx.arcTo(ckX + ckW, y0, ckX + ckW, y0 + ckRH - 10, rr2);
+      ctx.arcTo(ckX + ckW, y0 + ckRH - 10, ckX, y0 + ckRH - 10, rr2);
+      ctx.arcTo(ckX, y0 + ckRH - 10, ckX, y0, rr2);
+      ctx.arcTo(ckX, y0, ckX + ckW, y0, rr2);
+      ctx.closePath();
+      if (i2 === 0){ ctx.save(); ctx.shadowColor = "rgba(89,214,201,.55)"; ctx.shadowBlur = 12; }
+      ctx.fillStyle = "rgba(8,12,21,.96)"; ctx.fill();
+      ctx.strokeStyle = ly.frozen ? "rgba(237,232,220,.55)" : `rgba(${hue[0]},${i2 === 0 ? 0.75 : 0.45})`;
+      ctx.lineWidth = 1; ctx.stroke();
+      if (i2 === 0) ctx.restore();
+      const te = times[i2], ph2 = phys[i2];
+      /* two true clocks: t runs at te seconds; tau at te/gamma. Hand = seconds hand,
+         one revolution per 60 s of THAT clock's own time. */
+      [0, 1].forEach(cIdx => {
+        const rq = full ? 17 : Math.max(9, Math.round(ckRH*0.24));
+        const cxq = ckX + 28 + cIdx*46, cyq = y0 + rq + 8;
+        const sec = cIdx === 0 ? te : te/ph2.gm;
+        ctx.strokeStyle = `rgba(${hue[cIdx]},.9)`; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(cxq, cyq, rq, 0, 7); ctx.stroke();
+        ctx.lineWidth = 1;
+        for (let k4 = 0; k4 < 12; k4++){
+          const a4 = k4*Math.PI/6;
+          ctx.strokeStyle = `rgba(${hue[cIdx]},${k4 % 3 === 0 ? 0.7 : 0.3})`;
+          ctx.beginPath();
+          ctx.moveTo(cxq + Math.cos(a4)*rq*0.86, cyq + Math.sin(a4)*rq*0.86);
+          ctx.lineTo(cxq + Math.cos(a4)*rq, cyq + Math.sin(a4)*rq); ctx.stroke();
+        }
+        const ang = (sec % 60)/60*2*Math.PI - Math.PI/2;
+        ctx.strokeStyle = `rgba(${hue[cIdx]},.95)`; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(cxq, cyq);
+        ctx.lineTo(cxq + Math.cos(ang)*rq*0.8, cyq + Math.sin(ang)*rq*0.8); ctx.stroke();
+        ctx.font = "8px 'IBM Plex Mono', monospace";
+        ctx.fillStyle = `rgba(${hue[cIdx]},.85)`;
+        ctx.fillText(cIdx === 0 ? "t" : "\u03C4", cxq - 2, cyq + rq + 9);
+        ctx.fillStyle = "rgba(237,232,220,.8)";
+        if (full) ctx.fillText(sec.toFixed(1) + "s", cxq - 12, cyq + rq + 19);
+        else if (cIdx === 1) ctx.fillText((te).toFixed(1) + "\u00B7" + (te/ph2.gm).toFixed(1) + "s", ckX + 8, y0 + ckRH - 14);
+      });
+      ctx.font = "8.5px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = ly.frozen ? "rgba(237,232,220,.9)" : "rgba(237,232,220,.55)";
+      if (ly.frozen) ctx.fillText("\u2016", ckX + ckW - 12, y0 + 12);
+      else if (ly.mode === "(t+\u03C4)/2"){
+        /* flat division bar, inside the card */
+        const fx2 = ckX + ckW - 26;
+        ctx.fillText("t+\u03C4", fx2 - 2, y0 + 11);
+        ctx.strokeStyle = "rgba(237,232,220,.55)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(fx2 - 4, y0 + 14); ctx.lineTo(fx2 + 18, y0 + 14); ctx.stroke();
+        ctx.fillText("2", fx2 + 4, y0 + 24);
+      } else {
+        const mtx = ly.mode.replace("B_T","B\u209C");
+        ctx.fillText(mtx, ckX + ckW - 8 - ctx.measureText(mtx).width, y0 + 12);
+      }
+      mesh.clockHits.push({ x: ckX, y: y0, w: ckW, h: ckRH - 10, ref: i2 === 0 ? mesh.base : mesh.layers[i2 - 1] });
+    });
+    ctx.font = "9px 'IBM Plex Mono', monospace"; ctx.fillStyle = "rgba(237,232,220,.45)";
+    ctx.fillText("drag rotate \u00B7 shift-drag pan \u00B7 wheel zoom \u00B7 dblclick clock: reset its time \u00B7 shift-click clock: freeze", w*0.04, h - 22);
+    ctx.fillText("dblclick mesh: recenter \u00B7 shift-click mesh: reset all \u00B7 zero height = flat, everywhere", w*0.04, h - 9);
+
+  } else if (mesh.view === 1){
+    /* POLAR SECTION of the algebra's field: every pair contributes its own
+       radial wave (via mesh.comp — the same mode semantics as the mesh view)
+       times its own angular lobe structure; added pairs combine left-to-right
+       by their chosen op. Interactions: drag = probe (per-pair values at the
+       point); click a legend row = solo that pair; click it again to unsolo. */
+    if (!mesh.map.bound){
+      mesh.map.bound = true;
+      const cv3 = document.getElementById("meshCanvas");
+      const toXY = ev => {
+        const r3 = cv3.getBoundingClientRect();
+        return [(ev.clientX - r3.left)*(cv3.clientWidth/Math.max(1, r3.width)),
+                (ev.clientY - r3.top)*(cv3.clientHeight/Math.max(1, r3.height))];
+      };
+      cv3.addEventListener("pointerdown", ev => {
+        if (mesh.view !== 1) return;
+        const [mx, my] = toXY(ev);
+        if (mx < 230 && my > 24 && my < 24 + 16*(1 + mesh.layers.length + 1)){
+          const row = Math.floor((my - 24)/16);
+          if (row <= mesh.layers.length){
+            mesh.map.solo = (mesh.map.solo === row) ? -1 : row;
+            return;
+          }
+        }
+        mesh.map.probe = [mx, my]; mesh.map.dragOn = true;
+      });
+      cv3.addEventListener("pointermove", ev => {
+        if (mesh.view === 1 && mesh.map.dragOn) mesh.map.probe = toXY(ev);
+      });
+      ["pointerup","pointercancel"].forEach(e3 => cv3.addEventListener(e3, () => { mesh.map.dragOn = false; }));
+    }
+    if (mesh.map.solo >= A.allPairs.length) mesh.map.solo = -1;
+    const cx = w/2, cy = h/2, R = Math.min(w,h)*0.44;
+    const mOf = i3 => Math.max(0.5, A.phys[i3].Bf*0.05) * A.phys[i3].gm;
+    const cAt = (i3, r, th) =>
+      mesh.comp(A.allPairs[i3], A.phys[i3], r*3, 1, A.times[i3]) *
+      Math.cos(th*mOf(i3) + A.times[i3]*0.4);
+    const fAt = (r, th) => {
+      if (mesh.map.solo >= 0) return cAt(mesh.map.solo, r, th);
+      let v = cAt(0, r, th);
+      for (let i3 = 1; i3 < A.allPairs.length; i3++)
+        v = mesh.applyOp(v, A.allPairs[i3].op, cAt(i3, r, th));
+      return v;
+    };
+    const rings = 42, spokes = 84;
+    for (let ri = 1; ri <= rings; ri++){
+      const r = ri/rings;
+      for (let si = 0; si < spokes; si++){
+        const th = si/spokes * 6.2832;
+        const raw = fAt(r, th);
+        const val = raw/(1 + Math.abs(raw)*0.4);
+        const a = Math.abs(val);
+        if (a < 0.22) continue;
+        const mix = (Math.max(-1, Math.min(1, val)) + 1)/2;
+        ctx.fillStyle = duo(mix, Math.min(0.75, a*0.6));
+        const x = cx + Math.cos(th)*r*R, y = cy + Math.sin(th)*r*R*0.9;
+        ctx.fillRect(x, y, 2.4, 2.4);
+      }
+    }
+    if (A.allPairs.length === 1 && mesh.map.solo < 0){
+      const m = mOf(0);
+      const nLines = Math.min(24, Math.max(2, Math.round(m*2)));
+      ctx.strokeStyle = "rgba(237,232,220,.13)"; ctx.lineWidth = 1;
+      for (let k = 0; k < nLines; k++){
+        const th = (Math.PI/2 + k*Math.PI - A.times[0]*0.4) / m;
+        ctx.beginPath();
+        ctx.moveTo(cx - Math.cos(th)*R, cy - Math.sin(th)*R*0.9);
+        ctx.lineTo(cx + Math.cos(th)*R, cy + Math.sin(th)*R*0.9);
+        ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = "rgba(237,232,220,.2)";
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    /* legend: one row per pair, live value at the probe (or r=.5, th=0) */
+    let pr = 0.5, pth = 0;
+    if (mesh.map.probe){
+      const dx = mesh.map.probe[0] - cx, dy = (mesh.map.probe[1] - cy)/0.9;
+      pr = Math.min(1, Math.hypot(dx, dy)/R); pth = Math.atan2(dy, dx);
+      ctx.strokeStyle = "rgba(237,232,220,.6)"; ctx.lineWidth = 1;
+      const pxx = cx + Math.cos(pth)*pr*R, pyy = cy + Math.sin(pth)*pr*R*0.9;
+      ctx.beginPath(); ctx.moveTo(pxx - 7, pyy); ctx.lineTo(pxx + 7, pyy);
+      ctx.moveTo(pxx, pyy - 7); ctx.lineTo(pxx, pyy + 7); ctx.stroke();
+    }
+    ctx.font = "10px 'IBM Plex Mono', monospace";
+    ctx.fillStyle = "rgba(237,232,220,.45)";
+    ctx.fillText("polar section of the mesh algebra \u00B7 drag = probe \u00B7 click a row = solo", 14, 16);
+    A.allPairs.forEach((ly, i3) => {
+      const hu = i3 === 0 ? "89,214,201" : (mesh.HUES[i3] ? mesh.HUES[i3][0] : "150,120,255");
+      const so = mesh.map.solo === i3;
+      const cv4 = cAt(i3, pr, pth);
+      ctx.fillStyle = "rgba(" + hu + "," + (so ? "1" : mesh.map.solo >= 0 ? ".35" : ".85") + ")";
+      ctx.fillText((so ? "\u25CF " : "\u25CB ") + (i3 === 0 ? "base" : ly.op + " P" + i3) + " " + ly.mode +
+        (ly.frozen ? " \u2745" : "") + "  " + (cv4 >= 0 ? "+" : "") + cv4.toFixed(2), 14, 32 + i3*16);
+    });
+    const combined = fAt(pr, pth);
+    ctx.fillStyle = "rgba(255,215,0,.8)";
+    ctx.fillText("\u03A3(ops) " + (combined >= 0 ? "+" : "") + combined.toFixed(2) +
+      " @ r " + pr.toFixed(2) + " \u03B8 " + (pth*180/Math.PI).toFixed(0) + "\u00B0", 14, 32 + A.allPairs.length*16);
+  } else if (mesh.view === 3){
+    /* ============ vC-22 INTERFERENCE FIELD ============
+       Multi-source, zoomable, high-detail. Each source radiates sin(k r - w t):
+       the sin choice pins a TRUE stationary node at every source center — the
+       emergent stasis vC22 revealed (a property of zero-monopole waves, kept
+       deliberately). Source B and D carry gamma in their wavenumber: the acoustic
+       dilation bends the fringes. Wheel to zoom into finer temporal resolution;
+       drag to pan; double-click to add a source (up to 5), right-click one to
+       remove it. Grid density is fixed in SCREEN space, so zooming in genuinely
+       re-samples a smaller world window at higher resolution. */
+    if (!mesh.fld){
+      mesh.fld = {
+        zoom: 1, cx: 0, cz: 0, drag: null,
+        src: [ {x: -60, z: 0, tau: false, ph: 0}, {x: 60, z: 0, tau: true, ph: 0} ]
+      };
+      const F = mesh.fld, cv2 = document.getElementById("meshCanvas");
+      cv2.addEventListener("wheel", ev => {
+        ev.preventDefault();
+        F.zoom = Math.max(0.3, Math.min(9, F.zoom * (ev.deltaY < 0 ? 1.12 : 0.89)));
+      }, {passive: false});
+      cv2.addEventListener("pointerdown", ev => { if (mesh.view === 3) F.drag = [ev.clientX, ev.clientY]; });
+      cv2.addEventListener("pointermove", ev => {
+        if (mesh.view === 3 && F.drag){
+          F.cx -= (ev.clientX - F.drag[0]) / F.zoom * 0.9;
+          F.cz -= (ev.clientY - F.drag[1]) / F.zoom * 1.6;
+          F.drag = [ev.clientX, ev.clientY];
+        }
+      });
+      ["pointerup","pointercancel"].forEach(e2 => cv2.addEventListener(e2, () => { F.drag = null; }));
+      cv2.addEventListener("dblclick", ev => {
+        if (mesh.view !== 3 || F.src.length >= 5) return;
+        const r2 = cv2.getBoundingClientRect();
+        const mx = (ev.clientX - r2.left)*(cv2.width/r2.width/(window.devicePixelRatio||1));
+        const my = (ev.clientY - r2.top)*(cv2.height/r2.height/(window.devicePixelRatio||1));
+        F.src.push({ x: F.cx + (mx - cv2.clientWidth/2)/F.zoom,
+                     z: F.cz + (my - cv2.clientHeight*0.55)/(F.zoom*0.56),
+                     tau: F.src.length % 2 === 1, ph: Math.random()*6.28 });
+      });
+      cv2.addEventListener("contextmenu", ev => {
+        if (mesh.view !== 3 || F.src.length <= 1) return;
+        ev.preventDefault(); F.src.pop();
+      });
+    }
+    const F = mesh.fld;
+    const k1 = 0.10 * (1 + Math.min(2, p.Bf/700));
+    const kG = k1 * Math.min(2.2, Math.max(0.6, p.gamma/3));   /* gamma-carrying wavenumber */
+    const om2 = 1.4 + Math.min(4, p.Bf/180);
+    const srcAll = F.src.concat(mesh.laySrc(A, p, t));   /* the algebra radiates: one source per added pair */
+    const field = (wx, wz) => {
+      let hgt = 0, dt2 = 0;
+      for (const sc of srcAll){
+        const dx = wx - sc.x, dz = wz - sc.z;
+        const r2 = Math.hypot(dx, dz);
+        const k2 = sc.k2v !== undefined ? sc.k2v : (sc.tau ? kG : k1);
+        const env = Math.exp(-r2*0.0016);
+        const omS = sc.omv !== undefined ? sc.omv : om2;
+        const tS = sc.tt !== undefined ? sc.tt : t;
+        const arg = k2*r2 - omS*tS*(sc.tau ? 1/Math.max(1,(sc.gmv || p.gamma)*0.5) : 1) + sc.ph;
+        hgt += Math.sin(arg)*env;                 /* sin(kr): every source pins its own center */
+        dt2 += Math.abs(Math.cos(arg))*env;       /* |dh/dt| proxy: motion glow */
+      }
+      return [hgt, dt2];
+    };
+    /* screen-space grid: constant density; zoom re-samples the world finer */
+    const gx0 = w*0.04, gx1 = w*0.96, gy0 = h*0.10, gy1 = h*0.94;
+    const NC = 96, NR = 46, tilt = 0.56, hAmp = 30/Math.sqrt(F.zoom);
+    const P = [];
+    for (let i = 0; i <= NR; i++){
+      P[i] = [];
+      for (let j = 0; j <= NC; j++){
+        const sx2 = gx0 + (gx1-gx0)*j/NC, sy2 = gy0 + (gy1-gy0)*i/NR;
+        const wx = F.cx + (sx2 - w/2)/F.zoom;
+        const wz = F.cz + (sy2 - h*0.55)/(F.zoom*tilt);
+        const [hg, mo] = field(wx, wz);
+        P[i][j] = [sx2, sy2 - hg*hAmp, hg, mo, sy2];
+      }
+    }
+    /* wire in BOTH directions; alpha = motion glow x depth; nodal contour in gold */
+    for (let i = 0; i <= NR; i++){
+      for (let j = 0; j < NC; j++){
+        const a2 = P[i][j], b2 = P[i][j+1];
+        const mo = (a2[3] + b2[3])/2, dep = 0.35 + 0.65*(a2[4]-gy0)/(gy1-gy0);
+        const nodal = Math.abs(a2[2]) < 0.06 && Math.abs(b2[2]) < 0.06;
+        ctx.strokeStyle = nodal ? `rgba(255,215,0,${(0.25 + 0.5*mo)*dep})`
+          : `rgba(${a2[2] > 0 ? "89,214,201" : "245,168,60"},${(0.05 + 0.30*mo)*dep})`;
+        ctx.lineWidth = nodal ? 1.3 : 0.7;
+        ctx.beginPath(); ctx.moveTo(a2[0], a2[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke();
+      }
+    }
+    for (let j = 0; j <= NC; j += 2){
+      ctx.beginPath();
+      for (let i = 0; i <= NR; i++){ const q2 = P[i][j]; i === 0 ? ctx.moveTo(q2[0], q2[1]) : ctx.lineTo(q2[0], q2[1]); }
+      ctx.strokeStyle = "rgba(237,232,220,.07)"; ctx.lineWidth = 0.6; ctx.stroke();
+    }
+    /* sources: their pinned stationary centers drawn as what they are */
+    srcAll.forEach(sc => {
+      const sx2 = w/2 + (sc.x - F.cx)*F.zoom, sy2 = h*0.55 + (sc.z - F.cz)*F.zoom*tilt;
+      if (sx2 < 0 || sx2 > w) return;
+      const cc = sc.hue || (sc.tau ? "245,168,60" : "89,214,201");
+      const gl = ctx.createRadialGradient(sx2, sy2, 0, sx2, sy2, 16);
+      gl.addColorStop(0, `rgba(${cc},.7)`); gl.addColorStop(1, `rgba(${cc},0)`);
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(sx2, sy2, 16, 0, 7); ctx.fill();
+      ctx.strokeStyle = "rgba(237,232,220,.85)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(sx2, sy2, 3.2, 0, 7); ctx.stroke();  /* hollow: a true node */
+      if (sc.lay){
+        ctx.fillStyle = `rgba(${cc},.9)`; ctx.font = "10px 'IBM Plex Mono', monospace";
+        ctx.fillText(sc.opG, sx2 + 9, sy2 - 9);
+      }
+    });
+    ctx.font = "9px 'IBM Plex Mono', monospace"; ctx.fillStyle = "rgba(237,232,220,.45)";
+    ctx.fillText("zoom \u00D7" + F.zoom.toFixed(2) + " \u00B7 " + srcAll.length + " sources (" + (srcAll.length - F.src.length) + " from the algebra) \u00B7 wheel: zoom \u00B7 drag: pan \u00B7 dblclick: add \u00B7 rightclick: remove", gx0, h - 8);
+    ctx.fillText("hollow centers are true nodes \u2014 sin(kr) stasis, kept from vC22 \u00B7 gold: nodal lines where the clocks cancel", gx0, gy0 - 6);
+  } else {
+    /* VOLUMETRIC: the phase spinor as a cylinder of time.
+       Two helices wind up the tau axis — the t-phase (cyan) and the tau-phase (amber, 1/gamma
+       slower). Where their phases agree, gold alignment rings: the beats, spaced at the beat
+       wavelength, drifting as gamma changes. This is what the spinor is DOING. */
+    const cxx = w*0.5, topH = h*0.10, botH = h*0.88, Hh = botH - topH;
+    const r0 = Math.min(w, h)*0.20 * (1 + 0.10*Math.sin(t*1.3)*Math.min(1, p.BT*4));
+    const ry3 = r0*0.24;
+    /* envelope: cylinder silhouette + caps */
+    ctx.strokeStyle = "rgba(237,232,220,.18)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cxx - r0, topH); ctx.lineTo(cxx - r0, botH);
+    ctx.moveTo(cxx + r0, topH); ctx.lineTo(cxx + r0, botH); ctx.stroke();
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.ellipse(cxx, topH, r0, ry3, 0, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cxx, botH, r0, ry3, 0, 0, 7); ctx.stroke();
+    ctx.setLineDash([]);
+    /* central tau axis */
+    ctx.strokeStyle = "rgba(237,232,220,.12)";
+    ctx.beginPath(); ctx.moveTo(cxx, topH - 8); ctx.lineTo(cxx, botH + 8); ctx.stroke();
+    /* the two phase helices */
+    const om = 1.2 + Math.min(4.5, p.Bf/140);
+    const rateT = 1, rateTau = 1/p.gamma;
+    const helixPt = (u, rate) => {
+      const ang = om*17*u*rate - t*0.9*rate;
+      return [cxx + r0*Math.cos(ang), botH - u*Hh + ry3*Math.sin(ang), Math.sin(ang), ang];
+    };
+    const drawHelix = (rate, colF, colB) => {
+      const NPT = 150;
+      let prev = helixPt(0, rate);
+      for (let i2 = 1; i2 <= NPT; i2++){
+        const q = helixPt(i2/NPT, rate);
+        ctx.strokeStyle = (q[2] + prev[2])/2 > 0 ? colF : colB;
+        ctx.lineWidth = (q[2] + prev[2])/2 > 0 ? 1.8 : 1.1;
+        ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+        prev = q;
+      }
+    };
+    drawHelix(rateTau, "rgba(245,168,60,.85)", "rgba(245,168,60,.22)");
+    drawHelix(rateT, "rgba(89,214,201,.9)", "rgba(89,214,201,.24)");
+    /* each added pair winds its own helix twins inside the cylinder, in its
+       hue family, at its own rates and frozen/epoch time */
+    A.allPairs.slice(1).forEach((ly, ix) => {
+      const i2 = ix + 1, ph = A.phys[i2];
+      const rL = Math.max(r0*0.30, r0*(0.74 - 0.12*ix));
+      const omL = 1.2 + Math.min(4.5, ph.Bf/140);
+      const HU = mesh.HUES[i2] || ["150,120,255","235,110,220"];
+      const hp = (u, rate) => {
+        const ang = omL*17*u*rate - A.times[i2]*0.9*rate;
+        return [cxx + rL*Math.cos(ang), botH - u*Hh + ry3*0.9*Math.sin(ang), Math.sin(ang)];
+      };
+      [[1, HU[0]], [1/ph.gm, HU[1]]].forEach(([rate, hu]) => {
+        let prev2 = hp(0, rate);
+        for (let q2 = 1; q2 <= 110; q2++){
+          const pt2 = hp(q2/110, rate);
+          ctx.strokeStyle = "rgba(" + hu + "," + ((pt2[2] + prev2[2])/2 > 0 ? ".55" : ".16") + ")";
+          ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(prev2[0], prev2[1]); ctx.lineTo(pt2[0], pt2[1]); ctx.stroke();
+          prev2 = pt2;
+        }
+      });
+    });
+    /* the RESULTANT strand: the mesh algebra evaluated up the axis, every
+       pair combined left-to-right by its op — the arithmetic made a shape */
+    if (A.allPairs.length > 1){
+      ctx.strokeStyle = "rgba(255,215,0,.75)"; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let q2 = 0; q2 <= 130; q2++){
+        const u = q2/130;
+        let v2 = mesh.comp(A.allPairs[0], A.phys[0], u*4, 1, A.times[0]);
+        for (let i2 = 1; i2 < A.allPairs.length; i2++)
+          v2 = mesh.applyOp(v2, A.allPairs[i2].op, mesh.comp(A.allPairs[i2], A.phys[i2], u*4, 1, A.times[i2]));
+        const x2 = cxx + Math.max(-1.4, Math.min(1.4, v2))*r0*0.62;
+        const y2 = botH - u*Hh;
+        if (q2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+      }
+      ctx.stroke();
+    }
+    /* beat-alignment rings: heights where the two phases agree mod 2pi */
+    const dRate = om*17*(rateT - rateTau);
+    if (Math.abs(dRate) > 0.05){
+      const phOff = t*0.9*(rateT - rateTau);
+      for (let k2 = -30; k2 <= 30; k2++){
+        const u = (2*Math.PI*k2 + phOff) / dRate;
+        if (u < 0 || u > 1) continue;
+        const yA = botH - u*Hh;
+        ctx.strokeStyle = "rgba(255,215,0,.55)"; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.ellipse(cxx, yA, r0, ry3, 0, 0, 7); ctx.stroke();
+      }
+    } else {
+      ctx.fillStyle = "rgba(255,215,0,.6)"; ctx.font = "10.5px 'IBM Plex Mono', monospace";
+      ctx.fillText("\u03B3 \u2192 1 \u00B7 phases locked \u00B7 no beats", cxx + r0 + 12, topH + 20);
+    }
+    /* twin beads at the current instant + instantaneous phase difference */
+    const ub = ((reduced ? 0.4 : t*0.14) % 1);
+    const bT = helixPt(ub, rateT), bTau = helixPt(ub, rateTau);
+    ctx.strokeStyle = "rgba(237,232,220,.5)"; ctx.setLineDash([2,4]);
+    ctx.beginPath(); ctx.moveTo(bT[0], bT[1]); ctx.lineTo(bTau[0], bTau[1]); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = CYAN; ctx.shadowColor = CYAN; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(bT[0], bT[1], 4, 0, 7); ctx.fill();
+    ctx.fillStyle = AMBER; ctx.shadowColor = AMBER;
+    ctx.beginPath(); ctx.arc(bTau[0], bTau[1], 4, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+    const dphi = ((bT[3] - bTau[3]) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+    /* legend + readouts */
+    ctx.font = "10.5px 'IBM Plex Mono', monospace";
+    ctx.fillStyle = "rgba(89,214,201,.85)"; ctx.fillText("t-phase helix", 16, topH + 8);
+    ctx.fillStyle = "rgba(245,168,60,.85)"; ctx.fillText("\u03C4-phase \u00B7 1/\u03B3 slower", 16, topH + 24);
+    ctx.fillStyle = "rgba(255,215,0,.75)"; ctx.fillText("gold rings \u00B7 beat alignments", 16, topH + 40);
+    A.allPairs.slice(1).forEach((ly, ix) => {
+      const HU = mesh.HUES[ix + 1] || ["150,120,255","235,110,220"];
+      ctx.fillStyle = "rgba(" + HU[0] + ",.85)";
+      ctx.fillText(ly.op + " P" + (ix + 1) + " " + ly.mode + (ly.frozen ? " \u2745" : ""), 16, topH + 56 + ix*15);
+    });
+    if (A.allPairs.length > 1){
+      ctx.fillStyle = "rgba(255,215,0,.6)";
+      ctx.fillText("gold strand \u00B7 \u03A3(ops) left-to-right", 16, topH + 56 + (A.allPairs.length - 1)*15);
+    }
+    ctx.fillStyle = "rgba(237,232,220,.45)";
+    ctx.fillText("\u03C4 \u2191 up the cylinder \u00B7 \u0394\u03C6 now = " + dphi.toFixed(2) + " rad \u00B7 \u03B3 = " + p.gamma.toFixed(3), 16, h - 14);
+  }
+  /* twin clocks: coordinate (cyan) and proper (amber), accumulating real elapsed time.
+     On the Time mesh view the per-pair clock column replaces these entirely —
+     drawing both was the doubled-clock bug. */
+  if (mesh._lt === undefined) { mesh._lt = t; mesh.accT = 0; mesh.accTau = 0; }
+  const dtF = Math.min(0.1, Math.max(0, t - mesh._lt)); mesh._lt = t;
+  mesh.accT += dtF; mesh.accTau += dtF / p.gamma;
+  const dials = mesh.view === 0 ? [] : [[mesh.accT, CYAN, "t"], [mesh.accTau, AMBER, "\u03C4"]];
+  dials.forEach(([acc, col, lab], i) => {
+    const dx = w - 118 + i*62, dy = 34, dr = 17;
+    ctx.strokeStyle = col; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(dx, dy, dr, 0, 7); ctx.stroke();
+    const a = (acc % 60)/60 * 6.2832 - Math.PI/2;
+    ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(dx + Math.cos(a)*dr*0.82, dy + Math.sin(a)*dr*0.82); ctx.stroke();
+    ctx.fillStyle = col; ctx.font = "italic 12px 'STIX Two Text', serif"; ctx.textAlign = "center";
+    ctx.fillText(lab, dx, dy + dr + 13);
+    ctx.font = "8.5px 'IBM Plex Mono', monospace"; ctx.fillStyle = "rgba(237,232,220,.55)";
+    ctx.fillText(acc.toFixed(1) + "s", dx, dy + dr + 24);
+    ctx.textAlign = "left";
+  });
+  ctx.fillStyle = "rgba(237,232,220,.45)"; ctx.font = "11px 'IBM Plex Mono', monospace";
+  ctx.fillText("\u03B3 = " + p.gamma.toFixed(4), 16, 24);
+});
+const LIVE = [];
+function liveEq(tag, fn){
+  const panel = document.querySelector('.eq-panel[data-tag="' + tag + '"]');
+  if (!panel) return;
+  const d = document.createElement("div");
+  d.className = "eq-live eq-scroll";
+  panel.appendChild(d);
+  LIVE.push({d, fn});
+}
+let liveTimer = null;
+function liveNow(){
+  LIVE.forEach(item => {
+    /* re-render only when the line changed: an unchanged KaTeX rebuild every heartbeat
+       snapped a sideways-scrolled row back to its start */
+    try { const tex = item.fn(); if (tex !== item.tex){ renderTex(item.d, tex); item.tex = tex; } item.d.dataset.err = ""; }
+    catch(e){ if (item.d.dataset.err !== "1"){ item.d.dataset.err = "1"; item.d.textContent = "\u2026"; item.tex = null; } }
+  });
+}
+function refreshLive(){
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(liveNow, 70);
+}
+setInterval(liveNow, 1200);
+liveEq("Cross-frame beats", () => {
+  const p = mesh.physics();
+  return String.raw`\gamma = ${p.gamma.toFixed(4)},\quad \tau = ${p.tau.toFixed(4)}\,\mathrm{s},\quad B_T = ${p.BT.toFixed(4)}\,\mathrm{s},\quad B_f = ${p.Bf.toFixed(2)}\,\mathrm{Hz},\quad \gamma B_T = ${(p.gamma*p.BT).toFixed(4)}`;
+});
+document.addEventListener("input", refreshLive, {passive:true});
+document.addEventListener("click", e => {
+  if (e.target.closest(".seg, .chip, .dim-item, .m3-cell, .scale-cell, .btn")) refreshLive();
+}, {passive:true});
+refreshLive();
+
+})();
+</script>
+</body>
+</html>
