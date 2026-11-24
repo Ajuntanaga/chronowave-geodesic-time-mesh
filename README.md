@@ -17,7 +17,7 @@ The other two files are this README and a `.gitignore`.
 
 ## Where it comes from
 
-Made on 2026-11-14 from rev b91 of the compendium page (commit `6cf22d4` of chronowave-compendium) by the scripts in the `tools/split` folder of that repository (added in later commits). The section markup, the styles and the script statements are copied from the page without change. What differs is the page title and description, a short header and footer line and the link to the manual.
+Made on 2026-11-24 from rev b91 of the compendium page (commit `fbeb5b8` of chronowave-compendium) by the scripts in the `tools/split` folder of that repository (added in later commits). The section markup, the styles and the script statements are copied from the page without change. What differs is the page title and description, a short header and footer line and the link to the manual.
 
 ## Checks and limits
 

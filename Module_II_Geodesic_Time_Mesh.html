@@ -496,7 +496,7 @@ kbd{font-family:var(--mono);font-size:10px;color:var(--cyan);border:1px solid va
       <div style="color:var(--ivory);letter-spacing:.3em;text-transform:uppercase;margin-bottom:10px">Chronowave <span style="color:var(--amber)">Dynamics</span></div>
       <div>Framework &amp; papers &middot; Anthony M. Vargas &amp; Aethus Iqbal-Samir &middot; 2024&ndash;2026</div>
     </div>
-    <div class="disc">Module II &middot; Geodesic time mesh, extracted standalone from the full Temporal Engine compendium on 2026-11-14. A speculative theoretical framework, presented as proposed in the source papers and prototypes.</div>
+    <div class="disc">Module II &middot; Geodesic time mesh, extracted standalone from the full Temporal Engine compendium on 2026-11-24. A speculative theoretical framework, presented as proposed in the source papers and prototypes.</div>
   </div>
 </footer>
 
@@ -1392,8 +1392,11 @@ animate(document.getElementById("meshCanvas"), (ctx, w, h, t) => {
       cv2.addEventListener("dblclick", ev => {
         if (mesh.view !== 3 || F.src.length >= 5) return;
         const r2 = cv2.getBoundingClientRect();
-        const mx = (ev.clientX - r2.left)*(cv2.width/r2.width/(window.devicePixelRatio||1));
-        const my = (ev.clientY - r2.top)*(cv2.height/r2.height/(window.devicePixelRatio||1));
+        /* the backing store is capped at 2x (fitCanvas), so divide by the same capped ratio: the raw devicePixelRatio
+           put the source at 2/DPR of the click offset wherever the ratio is above 2 (a retina display zoomed to 150%, a 3x screen) */
+        const dprC = Math.min(window.devicePixelRatio || 1, 2);
+        const mx = (ev.clientX - r2.left)*(cv2.width/r2.width/dprC);
+        const my = (ev.clientY - r2.top)*(cv2.height/r2.height/dprC);
         F.src.push({ x: F.cx + (mx - cv2.clientWidth/2)/F.zoom,
                      z: F.cz + (my - cv2.clientHeight*0.55)/(F.zoom*0.56),
                      tau: F.src.length % 2 === 1, ph: Math.random()*6.28 });
